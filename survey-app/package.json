@@ -1,0 +1,36 @@
+{
+  "name": "wrd-survey",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The online questionnaire for the EL 3113 word retrieval study, in Tuwon's style",
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "e2e": "node scripts/e2e.mjs",
+    "questionnaire": "python3 -I scripts/form_to_questionnaire.py"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.45.0",
+    "motion": "14.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "playwright": "^1.63.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  }
+}

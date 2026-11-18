@@ -1,0 +1,531 @@
+{
+  "source": "Google Form 1FAIpQLSdMZwBxCj5m1gh2XSvsJvRJ3c3z0OXHrUkZmR_l6-AygU7L9A",
+  "title": "Exploring English Word Retrieval Difficulties and Verbal Compensatory Strategies of Filipino Majors: A Needs Analysis",
+  "description": "A survey questionnaire for BSEd Filipino students of the College of Education, University of Southeastern Philippines.\n\nResearchers: Armie Navarro, Reneil Ofilan, and Ian M. Quibete (BSEd English 3)\nResearch Adviser: Mary Rose J. Ponce",
+  "age_check": {
+    "question": "Are you 18 years old or older?",
+    "options": [
+      "Yes",
+      "No"
+    ],
+    "stop_title": "Parent or guardian consent needed",
+    "stop_message": "Please see the researchers. You need your parent or guardian’s consent before answering."
+  },
+  "consent": {
+    "title": "Informed Consent",
+    "intro": "We would like to invite you to participate in this research study. Before you decide, it is important that you are informed why the research is being conducted, what your participation will involve, and what risks and benefits are associated with your participation. Please take time to read this form and ask us if you have further questions or concerns. The researcher will provide you with answers to the italicized questions to ensure a better understanding of the research.",
+    "sections": [
+      {
+        "title": "Purpose of the Research",
+        "body": "This study aims to find out the word retrieval difficulties that BSEd Filipino students experience when speaking in English and the verbal compensatory strategies they use to deal with them. A word retrieval difficulty happens when you know what you want to say but cannot recall the English word you need. The study also looks at the speaking situations where these difficulties happen most and the language-learning activities that students prefer.\n\nThe results will serve as the basis for proposing language-learning activities that can help BSEd Filipino students speak English with more ease."
+      },
+      {
+        "title": "Selection of Participants",
+        "body": "You are invited because you are a BSEd Filipino student of the USeP College of Education who speaks a Philippine language such as Bisaya or Filipino as your first language. The researchers chose 16 first-year and 16 second-year students at random from the official class list of each year level to serve as the participants.\n\nThe researchers will also invite 10 third-year BSEd Filipino students to answer the questionnaire during its pilot test. The pilot test checks whether the items are clear before the actual data gathering."
+      },
+      {
+        "title": "Procedure",
+        "body": "If you agree to take part, you will sign this form and answer one survey questionnaire in print or online. The questionnaire has five parts. Part I asks for your profile, such as your age, sex, year level, and language background. Parts II to IV ask how often you experience word retrieval difficulties when speaking in English, how often you use certain strategies to deal with them, and in which speaking situations they happen. Part V asks which language-learning activities you would like to have.\n\nYou will answer each item by choosing a number on a five-point scale. There are no right or wrong answers, and a researcher will be present to explain any item you find unclear. If you are below 18 years old, your parent or guardian also needs to give written consent before you answer."
+      },
+      {
+        "title": "Duration",
+        "body": "Answering the questionnaire takes about 10 to 15 minutes in one sitting. The pilot test will be held on November 18, 2026, and the actual data gathering will run from November 19, 2026 onwards. The researchers will schedule the session at a time that does not disrupt your classes."
+      },
+      {
+        "title": "Risks",
+        "body": "The study involves no more than minimal risk. Some items ask about moments when you struggle to find English words, which may make you feel slightly uncomfortable. You may skip any item you do not want to answer, and you may stop at any time."
+      },
+      {
+        "title": "Benefits",
+        "body": "You will not receive payment or academic credit for taking part. Answering the questionnaire may help you become more aware of how you handle word retrieval difficulties when speaking in English. The results will also help the researchers propose language-learning activities that address the needs of BSEd Filipino students."
+      },
+      {
+        "title": "Voluntary Participation",
+        "body": "Your participation is entirely voluntary. You may decline to take part, skip any item, or withdraw at any time without giving a reason and without any penalty. Your decision will not affect your grades or your standing in the College of Education."
+      },
+      {
+        "title": "Confidentiality and Data Management",
+        "body": "Your participation in this research will be kept confidential to the extent allowed by law.\n\nKindly provide your name and address and sign below. Please note that all information is kept anonymous, and your name is not considered part of the data. This is solely for school records. Names and identifiable details will be replaced with participant codes, and access to the accomplished questionnaires and encoded data will be limited to the researchers and the research adviser to safeguard your identity and prevent public disclosure.\n\nYour answers will be reported only in summarized form. The questionnaires and encoded data will be stored securely and will be disposed of after the study in line with institutional requirements. All information will be handled in accordance with the Data Privacy Act of 2012 (Republic Act No. 10173)."
+      },
+      {
+        "title": "Sharing the Results",
+        "body": "The results will be presented in the researchers’ paper for EL 3113 Language Education Research and may be shared with the College of Education. Only summarized results will be reported, and no individual answers will be identified. You may ask the researchers for a summary of the findings once the study is completed."
+      },
+      {
+        "title": "Statement of Consent",
+        "body": "By signing below, you acknowledge that you have read and understood the information provided in this consent form and that you freely and voluntarily consent to participate in this study explained to you by Armie Navarro, Reneil Ofilan, and Ian M. Quibete.\n\nI understand that agreeing to take part means:\n1. I will answer a survey questionnaire that takes about 10 to 15 minutes to complete.\n2. My name will not appear in any report of the results.\n3. I may skip any item or withdraw from the study at any time without penalty."
+      }
+    ],
+    "data_use": {
+      "prompt": "Please tick the appropriate box:",
+      "options": [
+        "The researcher can use the information I provide in further research projects, which have ethical approval as long as my name and contact information are removed before they are given to the researchers.",
+        "The information I provide cannot be used by other researchers without asking me first.",
+        "The information I provide cannot be used except for this project."
+      ]
+    },
+    "fields": {
+      "name": "Participant’s name",
+      "signature": "Signature (type your full name)",
+      "address": "Address"
+    },
+    "agree": {
+      "question": "Do you agree to take part in this study?",
+      "yes": "Yes, I agree",
+      "no": "No, I do not agree"
+    }
+  },
+  "letter": {
+    "greeting": "Dear Respondent,",
+    "body": "We are BSEd English students of the College of Education, University of Southeastern Philippines, and we are conducting a study titled “Exploring English Word Retrieval Difficulties and Verbal Compensatory Strategies of Filipino Majors: A Needs Analysis.” This questionnaire asks about the moments when you cannot remember an English word while speaking, what you usually do at those moments, the situations where they happen, and the activities that could help you. Your answers will help us propose language-learning activities for BSEd Filipino students.\n\nThere are no right or wrong answers, and your answers will not affect your grades. Please answer honestly based on your own experience. Your answers will be kept confidential and will be used only for this study, in accordance with the Data Privacy Act of 2012 (Republic Act No. 10173). Answering takes about 10 to 15 minutes. You may skip any question or stop at any time without penalty.\n\nThank you for your time and help.\n\nRespectfully,\nThe Researchers"
+  },
+  "general_directions": {
+    "title": "General Directions",
+    "body": "This questionnaire has five parts. Read each statement carefully and choose the answer that best describes you. Choose only one answer for each statement.\n\nIn this questionnaire, a word retrieval difficulty is a moment when you know what you want to say in English but cannot remember the English word for it at that moment."
+  },
+  "parts": [
+    {
+      "id": "P1",
+      "title": "Part I. Respondent Profile",
+      "directions": "Directions: Please write your answer or choose the option that applies to you.",
+      "items": [
+        {
+          "n": 1,
+          "id": "P1_age",
+          "label": "Age",
+          "type": "number"
+        },
+        {
+          "n": 2,
+          "id": "P1_sex",
+          "label": "Sex",
+          "type": "choice",
+          "options": [
+            "Female",
+            "Male",
+            "Prefer not to say"
+          ]
+        },
+        {
+          "n": 3,
+          "id": "P1_year",
+          "label": "Year level",
+          "type": "choice",
+          "options": [
+            "First year",
+            "Second year",
+            "Third year (pilot test only)"
+          ]
+        },
+        {
+          "n": 4,
+          "id": "P1_l1",
+          "label": "First language, the language you learned first at home",
+          "type": "choice",
+          "options": [
+            "Bisaya/Cebuano",
+            "Filipino/Tagalog",
+            "English"
+          ],
+          "other": "P1_l1_other"
+        },
+        {
+          "n": 5,
+          "id": "P1_home",
+          "label": "Language you use most often at home",
+          "type": "choice",
+          "options": [
+            "Bisaya/Cebuano",
+            "Filipino/Tagalog",
+            "English"
+          ],
+          "other": "P1_home_other"
+        },
+        {
+          "n": 6,
+          "id": "P1_engfreq",
+          "label": "How often do you speak English outside your classes?",
+          "type": "choice",
+          "options": [
+            "Always",
+            "Often",
+            "Sometimes",
+            "Rarely",
+            "Never"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Part II. My Word Retrieval Difficulties",
+      "directions": "Directions: Think about the times you speak English, in class and in other situations. How often does each statement happen to you? Choose one answer for each statement.",
+      "stem": "How often does each statement happen to you?",
+      "scale": [
+        {
+          "value": 5,
+          "label": "Always"
+        },
+        {
+          "value": 4,
+          "label": "Often"
+        },
+        {
+          "value": 3,
+          "label": "Sometimes"
+        },
+        {
+          "value": 2,
+          "label": "Rarely"
+        },
+        {
+          "value": 1,
+          "label": "Never"
+        }
+      ],
+      "items": [
+        {
+          "n": 1,
+          "id": "P2_01",
+          "text": "When I speak English, I cannot remember the English word for what I want to say."
+        },
+        {
+          "n": 2,
+          "id": "P2_02",
+          "text": "I forget English words that I know when I have to speak."
+        },
+        {
+          "n": 3,
+          "id": "P2_03",
+          "text": "I forget English words I know when I feel nervous while speaking in class."
+        },
+        {
+          "n": 4,
+          "id": "P2_04",
+          "text": "I feel that an English word is on the tip of my tongue."
+        },
+        {
+          "n": 5,
+          "id": "P2_05",
+          "text": "I remember the word I needed only after I have finished speaking."
+        },
+        {
+          "n": 6,
+          "id": "P2_06",
+          "text": "I pause for a long time while I search for an English word."
+        },
+        {
+          "n": 7,
+          "id": "P2_07",
+          "text": "While I search for a word, I make sounds such as “ahm,” “uh,” or “kanang.”"
+        },
+        {
+          "n": 8,
+          "id": "P2_08",
+          "text": "I have trouble wording what I want to say quickly enough."
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Part III. What I Do When I Cannot Remember an English Word",
+      "directions": "Directions: Think about what you usually do when you cannot remember an English word while speaking. How often do you do each of the following? Choose one answer for each statement.",
+      "stem": "When I cannot remember an English word while I am speaking, . . .",
+      "scale": [
+        {
+          "value": 5,
+          "label": "Always"
+        },
+        {
+          "value": 4,
+          "label": "Often"
+        },
+        {
+          "value": 3,
+          "label": "Sometimes"
+        },
+        {
+          "value": 2,
+          "label": "Rarely"
+        },
+        {
+          "value": 1,
+          "label": "Never"
+        }
+      ],
+      "items": [
+        {
+          "n": 1,
+          "id": "P3_01",
+          "text": "I describe the physical appearance of the object instead of using the exact word."
+        },
+        {
+          "n": 2,
+          "id": "P3_02",
+          "text": "I use a word or phrase that means almost the same thing."
+        },
+        {
+          "n": 3,
+          "id": "P3_03",
+          "text": "I make up a new word to replace the one I cannot remember."
+        },
+        {
+          "n": 4,
+          "id": "P3_04",
+          "text": "I ask the person I am talking to for help with the word."
+        },
+        {
+          "n": 5,
+          "id": "P3_05",
+          "text": "I use phrases such as “How do I say this?” or “Let me think” to give myself time to recall the word."
+        },
+        {
+          "n": 6,
+          "id": "P3_06",
+          "text": "I use a Bisaya or Filipino word when I cannot think of the English word, for example, “Can you pass the takure?”"
+        },
+        {
+          "n": 7,
+          "id": "P3_07",
+          "text": "I leave my sentence unfinished because of some language difficulty."
+        },
+        {
+          "n": 8,
+          "id": "P3_08",
+          "text": "I explain what the object is used for, for example, “the thing we use to boil water for coffee” for kettle."
+        },
+        {
+          "n": 9,
+          "id": "P3_09",
+          "text": "I use a more general word that is close in meaning, for example, “fruit” for pomelo or “pot” for kettle."
+        },
+        {
+          "n": 10,
+          "id": "P3_10",
+          "text": "I create a new word by combining English words I know, for example, “airball” for balloon."
+        },
+        {
+          "n": 11,
+          "id": "P3_11",
+          "text": "I ask other people to help me when I cannot say what I mean."
+        },
+        {
+          "n": 12,
+          "id": "P3_12",
+          "text": "I use expressions such as “well,” “you know,” or “I mean” to keep talking while I look for the word."
+        },
+        {
+          "n": 13,
+          "id": "P3_13",
+          "text": "I switch to Bisaya or Filipino for a moment if I know that the person I am talking to understands it."
+        },
+        {
+          "n": 14,
+          "id": "P3_14",
+          "text": "I give up when I cannot make myself understood."
+        },
+        {
+          "n": 15,
+          "id": "P3_15",
+          "text": "I give examples to explain the word I mean, such as “spoon and fork” for utensils."
+        },
+        {
+          "n": 16,
+          "id": "P3_16",
+          "text": "I look for a different way to express the idea, like using a synonym."
+        },
+        {
+          "n": 17,
+          "id": "P3_17",
+          "text": "I guess a word that sounds like it might be right."
+        },
+        {
+          "n": 18,
+          "id": "P3_18",
+          "text": "I use a rising tone, as if asking a question, so that my listener will help me with the word."
+        },
+        {
+          "n": 19,
+          "id": "P3_19",
+          "text": "I use filler words or phrases to keep my turn while I think of what to say."
+        },
+        {
+          "n": 20,
+          "id": "P3_20",
+          "text": "I mix words from my first language into my English sentence to get my meaning across."
+        },
+        {
+          "n": 21,
+          "id": "P3_21",
+          "text": "I say only a few words instead of what I had planned to say."
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "title": "Part IV. Situations Where I Have Trouble Remembering English Words",
+      "directions": "Directions: How often do you have trouble remembering English words in each of the following situations? Choose one answer for each statement.",
+      "stem": "I have trouble remembering English words when . . .",
+      "scale": [
+        {
+          "value": 5,
+          "label": "Always"
+        },
+        {
+          "value": 4,
+          "label": "Often"
+        },
+        {
+          "value": 3,
+          "label": "Sometimes"
+        },
+        {
+          "value": 2,
+          "label": "Rarely"
+        },
+        {
+          "value": 1,
+          "label": "Never"
+        }
+      ],
+      "items": [
+        {
+          "n": 1,
+          "id": "P4_01",
+          "text": "I recite in class for a grade."
+        },
+        {
+          "n": 2,
+          "id": "P4_02",
+          "text": "I am called on to answer without warning."
+        },
+        {
+          "n": 3,
+          "id": "P4_03",
+          "text": "I speak without preparation, such as in an impromptu speech."
+        },
+        {
+          "n": 4,
+          "id": "P4_04",
+          "text": "I give an oral report or presentation in front of the class."
+        },
+        {
+          "n": 5,
+          "id": "P4_05",
+          "text": "I take an oral examination or a graded speaking test."
+        },
+        {
+          "n": 6,
+          "id": "P4_06",
+          "text": "I have only a short time to answer."
+        },
+        {
+          "n": 7,
+          "id": "P4_07",
+          "text": "I join a group discussion in English."
+        },
+        {
+          "n": 8,
+          "id": "P4_08",
+          "text": "I talk with a teacher in English."
+        },
+        {
+          "n": 9,
+          "id": "P4_09",
+          "text": "I talk with classmates or friends in English outside class."
+        },
+        {
+          "n": 10,
+          "id": "P4_10",
+          "text": "I talk in English with someone I do not know well."
+        }
+      ]
+    },
+    {
+      "id": "P5",
+      "title": "Part V. Activities That Can Help Me",
+      "directions": "Directions: The researchers will propose activities that can help students when they cannot remember English words while speaking. Read each statement and choose the answer that shows how much you agree. Answer based on your own needs, since students may need different activities.",
+      "stem": "How much do you agree with each statement?",
+      "scale": [
+        {
+          "value": 5,
+          "label": "Strongly Agree"
+        },
+        {
+          "value": 4,
+          "label": "Agree"
+        },
+        {
+          "value": 3,
+          "label": "Neither Agree nor Disagree"
+        },
+        {
+          "value": 2,
+          "label": "Disagree"
+        },
+        {
+          "value": 1,
+          "label": "Strongly Disagree"
+        }
+      ],
+      "items": [
+        {
+          "n": 1,
+          "id": "P5_01",
+          "text": "I want lessons that teach me what to do when I forget an English word, such as describing it or using a similar word."
+        },
+        {
+          "n": 2,
+          "id": "P5_02",
+          "text": "I want to learn English phrases that give me time to think, such as “How do I say this?” or “Let me think.”"
+        },
+        {
+          "n": 3,
+          "id": "P5_03",
+          "text": "I want to practice describing pictures or objects so that a partner can guess them."
+        },
+        {
+          "n": 4,
+          "id": "P5_04",
+          "text": "I want to practice speaking through role-play and simulation activities."
+        },
+        {
+          "n": 5,
+          "id": "P5_05",
+          "text": "I want to learn speaking through educational games."
+        },
+        {
+          "n": 6,
+          "id": "P5_06",
+          "text": "I want to practice giving short impromptu talks on everyday topics."
+        },
+        {
+          "n": 7,
+          "id": "P5_07",
+          "text": "I want to watch or listen to model conversations that show how speakers handle a forgotten word."
+        },
+        {
+          "n": 8,
+          "id": "P5_08",
+          "text": "I want to receive immediate feedback from my teacher after I speak."
+        },
+        {
+          "n": 9,
+          "id": "P5_09",
+          "text": "I would benefit from practicing speaking with a partner or in a small group."
+        },
+        {
+          "n": 10,
+          "id": "P5_10",
+          "text": "I would benefit from practicing speaking on my own."
+        }
+      ]
+    }
+  ],
+  "pilot_only": {
+    "title": "For Pilot Test Respondents Only",
+    "intro": "If you are answering as part of the pilot test, please tell us about any unclear items.",
+    "question": "Were any statements or directions unclear or hard to answer? Please write the part and item number and what confused you."
+  },
+  "closing_message": "Thank you for answering the questionnaire."
+}

@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+/*
+  Tuwon's design tokens and press styles, copied from tuwon-player (src/design/tokens.css), trimmed
+  to what the questionnaire uses. Tuwon Sans is Ian's font (one variable file, weights 100–900).
+*/
+@font-face {
+  font-family: "Tuwon Sans";
+  src: url("./fonts/TuwonSans-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Tuwon Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Tuwon Sans reads darker than Nunito at the same weight, so the named weights sit lower */
+  --font-weight-medium: 420;
+  --font-weight-semibold: 480;
+  --font-weight-bold: 640;
+
+  /* mobile < 755, tablet 755–1024, desktop > 1024 */
+  --breakpoint-*: initial;
+  --breakpoint-tablet: 755px;
+  --breakpoint-desktop: 1025px;
+
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-bg: #ffffff;
+  --color-surface: #f7f7f7;
+  --color-line: #e5e5e5;
+  --color-line-shadow: #cfcfcf;
+
+  --color-ink-strong: #3c3c3c;
+  --color-ink: #4b4b4b;
+  --color-ink-secondary: #777777;
+  --color-ink-soft: #777777;
+  --color-ink-muted: #afafaf;
+  --color-ink-button: #afafaf;
+
+  --color-brand: #ff9600;
+  --color-brand-dark: #e08600;
+  --color-brand-shadow: #b36900;
+  --color-brand-tint: #ffebcf;
+  --color-brand-wash: #fff4e5;
+  --color-brand-glow: #ffb040;
+  --color-brand-ink: #9a5200;
+  --color-focus: var(--color-brand);
+
+  --color-correct: #58cc02;
+  --color-correct-dark: #58a700;
+  --color-correct-tint: #e4ffcf;
+  --color-correct-ink: #3b7600;
+
+  --color-incorrect: #ff4b4b;
+  --color-incorrect-dark: #a70404;
+  --color-incorrect-tint: #ffd7d8;
+  --color-incorrect-ink: #ea2b2b;
+
+  --color-exit: #dd5d37;
+
+  /* the researchers' page: Tuwon's app shell (teacher app) look */
+  --color-app-bg: #f3f4f6;
+  --color-panel: #ffffff;
+  --color-line-hair: #00000014;
+
+  --radius-*: initial;
+  --radius-xs: 2px;
+  --radius-sm: 5px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px #0000000a;
+
+  --spacing-strip: 50px;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-bg font-sans text-ink antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  :root {
+    --focus-width: 1px;
+  }
+  :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Duolingo-style hard shadow that the element sinks into when pressed */
+  .press {
+    --press-depth: 5px;
+    --press-color: var(--color-line);
+    box-shadow: 0 var(--press-depth) 0 0 var(--press-color);
+    transition: none;
+    user-select: none;
+    touch-action: manipulation;
+    position: relative;
+  }
+  .press:active:not(:disabled),
+  .press.is-pressed:not(:disabled),
+  .press[data-tap-pressed]:not(:disabled) {
+    box-shadow: none;
+    transform: translateY(var(--press-depth));
+  }
+  .press:disabled {
+    cursor: default;
+  }
+  /* the focus ring goes around the button and its 3D bottom together */
+  .press:focus-visible {
+    outline: none;
+  }
+  .press:focus-visible::after {
+    content: "";
+    position: absolute;
+    inset: -1px -1px calc(-1px - var(--press-depth)) -1px;
+    border-radius: inherit;
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: 2px;
+    pointer-events: none;
+  }
+  .press:active:not(:disabled)::after,
+  .press.is-pressed:not(:disabled)::after,
+  .press[data-tap-pressed]:not(:disabled)::after {
+    bottom: -1px;
+  }
+}
+
+/* the whole screen, on browsers that know the dynamic viewport (dvh) and on older ones that don't */
+@utility h-app {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* the researchers' page cards (same look as the Tuwon teacher app) */
+@utility card {
+  background-color: var(--color-panel);
+  border-radius: var(--radius-lg);
+  outline: 1px solid var(--color-line-hair);
+  outline-offset: -1px;
+  box-shadow: var(--shadow-card);
+}
