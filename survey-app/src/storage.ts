@@ -1,3 +1,4 @@
+import type { Lang } from "./strings"
 import type { Answers } from "./survey"
 
 /**
@@ -80,5 +81,25 @@ export function forgetSession() {
     localStorage.removeItem(KEY)
   } catch {
     /* nothing kept */
+  }
+}
+
+/** its own key, so the language stays when a questionnaire is submitted or forgotten (Ian, 2026-11-19) */
+const LANG_KEY = "wrd-survey:lang"
+
+/** the language picked on this phone: English, the validated instrument's language, until Filipino is picked */
+export function loadLang(): Lang {
+  try {
+    return localStorage.getItem(LANG_KEY) === "fil" ? "fil" : "en"
+  } catch {
+    return "en"
+  }
+}
+
+export function saveLang(lang: Lang) {
+  try {
+    localStorage.setItem(LANG_KEY, lang)
+  } catch {
+    /* not kept: the switch still works until the page is closed */
   }
 }

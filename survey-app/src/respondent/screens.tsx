@@ -1,27 +1,37 @@
 import clsx from "clsx"
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
-import { CheckCards, ChoiceCards, LikertSlider, likertSliderHeight } from "@/components/Answers"
+import { useLanguage, useStrings } from "@/app/language"
+import { CheckCards, ChoiceCards, LikertSlider, likertSliderHeight, OTHER } from "@/components/Answers"
 import { Overline } from "@/components/Bits"
 import { optionStyle } from "@/components/optionStyles"
 import { TextField } from "@/components/TextField"
 import {
   likertAt,
-  likertParts,
+  likertPartsIn,
   PILOT_YEAR,
   paragraphs,
   partName,
-  profile,
+  profileIn,
   q,
+  texts,
   type Answers,
   type Screen,
 } from "@/survey"
 
 /*
- * What each screen shows. All the questionnaire's words come from questionnaire.json (`q`); the
- * few words that are the app's own (button labels, "3 of 21", the review) are written here and in
- * App.tsx. Sizes: `compact` is a phone.
+ * What each screen shows, in the language picked (Ian, 2026-11-19). The questionnaire's words come
+ * from questionnaire.json and questionnaire.fil.json (`texts`); the few words that are the app's
+ * own (button labels, "3 of 21", the review) are in strings.ts. The answers kept are always the
+ * English options (`q`): a card only shows them in Filipino. Sizes: `compact` is a phone.
  */
+
+/** the questionnaire's words in the language picked */
+const useTexts = () => texts[useLanguage().lang]
+
+/** what the cards of a question show for each English option: the same option in the language picked */
+const shownIn = (options: string[], shown: string[]) =>
+  Object.fromEntries(options.map((option, i) => [option, shown[i] ?? option]))
 
 function Column({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -54,12 +64,14 @@ const reading = (compact: boolean) =>
 /**
  * A part's directions, as the form has them but for two things left out (Ian, 2026-11-19): the word
  * "Directions:" before them, and the last sentence of Parts II to IV, "Choose one answer for each
- * statement." (the general directions say it once, and the slider takes one answer only).
+ * statement." (the general directions say it once, and the slider takes one answer only). The
+ * Filipino has the same two, in its own words (strings.ts).
  */
 function Directions({ text, compact }: { text: string; compact: boolean }) {
-  const shown = text
-    .replace(/^Directions:\s*/, "")
-    .replace(/\s*Choose one answer for each statement\.$/, "")
+  const t = useStrings()
+  let shown = text.trim()
+  if (shown.startsWith(t.directionsLead)) shown = shown.slice(t.directionsLead.length).trim()
+  if (shown.endsWith(t.directionsTail)) shown = shown.slice(0, -t.directionsTail.length).trim()
   return <p className={clsx("font-medium text-pretty text-ink", reading(compact))}>{shown}</p>
 }
 
@@ -75,7 +87,9 @@ export function StartScreen({
   test: boolean
   compact: boolean
 }) {
-  const [about, ...people] = paragraphs(q.description)
+  const tx = useTexts()
+  const t = useStrings()
+  const [about, ...people] = paragraphs(tx.description)
   const note = clsx("rounded-[16px] border-2 p-4 font-semibold text-pretty", reading(compact))
   return (
     <Column className={compact ? "gap-6" : "gap-8"}>
@@ -86,7 +100,7 @@ export function StartScreen({
             compact ? "text-[24px]" : "text-[36px]",
           )}
         >
-          {q.title}
+          {tx.title}
         </h1>
         <p className={clsx("font-medium text-pretty text-ink", reading(compact))}>{about}</p>
         {people.map((p) => (
@@ -105,15 +119,10 @@ export function StartScreen({
       {(waiting || test) && (
         <div className={clsx("flex flex-col", compact ? "gap-3" : "gap-4")}>
           {waiting && (
-            <p className={clsx(note, "border-brand bg-brand-wash text-brand-ink")}>
-              You have an unfinished questionnaire on this phone. Press CONTINUE to pick up where you
-              left off.
-            </p>
+            <p className={clsx(note, "border-brand bg-brand-wash text-brand-ink")}>{t.waiting}</p>
           )}
           {test && (
-            <p className={clsx(note, "border-line text-ink-secondary")}>
-              Test run: these answers are kept apart and don’t count.
-            </p>
+            <p className={clsx(note, "border-line text-ink-secondary")}>{t.testRun}</p>
           )}
         </div>
       )}
@@ -132,12 +141,15 @@ export function AgeScreen({
   onChoose: (option: string) => void
   compact: boolean
 }) {
+  const age = useTexts().age_check
   return (
     <Column className={compact ? "gap-6" : "gap-8"}>
-      <Question compact={compact}>{q.age_check.question}</Question>
+      <Question compact={compact}>{age.question}</Question>
       <ChoiceCards
-        label={q.age_check.question}
+        label={age.question}
+        // the answer kept is the English option: NEXT compares it (App.tsx)
         options={q.age_check.options}
+        shownAs={shownIn(q.age_check.options, age.options)}
         value={value}
         onChoose={onChoose}
         compact={compact}
@@ -205,11 +217,12 @@ export function DataUseScreen({
   onToggle: (n: number) => void
   compact: boolean
 }) {
-  const d = q.consent.data_use
+  const d = useTexts().consent.data_use
+  const t = useStrings()
   return (
     <Column className={compact ? "gap-4" : "gap-6"}>
       <div className="flex flex-col gap-1">
-        <Overline>Tick one or more</Overline>
+        <Overline>{t.tickOneOrMore}</Overline>
         <h1
           className={clsx(
             "leading-[1.2] font-[700] text-ink-strong",
@@ -223,9 +236,6 @@ export function DataUseScreen({
     </Column>
   )
 }
-
-export const today = () =>
-  new Date().toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })
 
 export function SignScreen({
   name,
@@ -242,7 +252,7 @@ export function SignScreen({
   onDecline: () => void
   compact: boolean
 }) {
-  const f = q.consent.fields
+  const { fields: f, agree } = useTexts().consent
   return (
     // 14px between them on a phone: with the line, 16px would make a 320 × 568 phone scroll
     <Column className={compact ? "gap-[14px]" : "gap-5"}>
@@ -253,15 +263,22 @@ export function SignScreen({
           the counts are (App.tsx) (Ian, 2026-11-19) */}
       <hr className="w-full border-t-2 border-line" />
       <div className="flex flex-col items-center text-center">
-        <p className={clsx("font-[700] text-ink-strong", compact ? "text-[17px]" : "text-[20px]")}>
-          {q.consent.agree.question}
+        {/* the Filipino question takes two lines on a phone: closer together, so that a 320 × 568
+            phone still does not scroll. The English is as it was */}
+        <p
+          className={clsx(
+            "font-[700] text-ink-strong",
+            compact ? "text-[17px] [&:lang(fil)]:leading-[20px]" : "text-[20px]",
+          )}
+        >
+          {agree.question}
         </p>
         <button
           type="button"
           onClick={onDecline}
           className="flex min-h-[44px] items-center px-4 text-[15px] font-[700] text-incorrect-ink underline-offset-4 hover:underline"
         >
-          {q.consent.agree.no}
+          {agree.no}
         </button>
       </div>
     </Column>
@@ -271,7 +288,8 @@ export function SignScreen({
 /* ---------- the parts ---------- */
 
 export function PartIntroScreen({ part, compact }: { part: number; compact: boolean }) {
-  const p = part === 0 ? profile : likertParts[part - 1]
+  const { lang } = useLanguage()
+  const p = part === 0 ? profileIn(lang) : likertPartsIn(lang)[part - 1]
   const { name } = partName(p.title)
   return (
     <Column className={compact ? "gap-4" : "gap-6"}>
@@ -299,16 +317,21 @@ export function ProfileScreen({
   onAnswer: (id: string, value: string) => void
   compact: boolean
 }) {
+  const { lang } = useLanguage()
+  const t = useStrings()
+  // the screen's item is the English one: its options are the answers kept. The words shown are
+  // the same item's in the language picked
   const { item } = screen
+  const shown = profileIn(lang).items[screen.ordinal - 1]
   const value = answers[item.id]
   return (
     <Column className={compact ? "gap-5" : "gap-7"}>
-      <Question compact={compact}>{item.label}</Question>
+      <Question compact={compact}>{shown.label}</Question>
       {item.type === "number" ? (
         <div className="mx-auto w-[150px]">
           <TextField
             id={item.id}
-            label={item.label}
+            label={shown.label}
             hideLabel
             value={value === undefined ? "" : String(value)}
             onChange={(v) => onAnswer(item.id, v.replace(/\D/g, ""))}
@@ -320,16 +343,20 @@ export function ProfileScreen({
         </div>
       ) : (
         <ChoiceCards
-          label={item.label}
+          label={shown.label}
           options={item.options ?? []}
           value={value === undefined ? null : String(value)}
           onChoose={(option) => onAnswer(item.id, option)}
           compact={compact}
           // fourth years are not in the study: the card is there to be seen, not picked (Ian, 2026-11-19)
-          shownOnly={item.id === "P1_year" ? ["Fourth year"] : undefined}
+          shownOnly={item.id === "P1_year" ? [t.fourthYear] : undefined}
           // the pilot's year reads "Third year"; the answer saved keeps the form's words, which make
           // the group P (Ian, 2026-11-19)
-          shownAs={{ [PILOT_YEAR]: "Third year" }}
+          shownAs={{
+            ...shownIn(item.options ?? [], shown.options ?? []),
+            [PILOT_YEAR]: t.thirdYear,
+            [OTHER]: t.other,
+          }}
           // Sex: one card under the other at every width (Ian, 2026-11-19)
           stacked={item.id === "P1_sex"}
           other={
@@ -348,13 +375,16 @@ export function ProfileScreen({
 
 /*
  * A Likert item is two layers of one box. The words (LikertScreen) slide from item to item; the
- * slider (LikertDock, in the Frame's dock) stays where it is. The box is a Column of a set height
- * in the middle of the screen: the slider at its bottom, the words standing on it and growing
- * upwards, so from one item to the next only the words change. Words too long for the room (a very
- * small phone) scroll on their own, above the slider. 320px holds the longest item on a 320px
- * phone (181px of words) and on a tablet (152px), with the slider under it.
+ * slider (LikertDock, in the Frame's dock) stays where it is: where a 320px box in the middle of
+ * the screen ends, the same place in either language. The words stand on the slider and grow
+ * upwards, so from one item to the next only the words change. They have all the room above the
+ * slider, not only the 320px box's: the Filipino items run longer (the longest needs about 230px
+ * on a 320px phone, the longest English one 181px) and would not fit in it (Ian, 2026-11-19).
+ * Words too long even for that scroll on their own, above the slider.
  */
-const likertBox = "flex h-full max-h-[320px] w-full max-w-[560px] flex-col tablet:max-w-[680px]"
+const likertBox = "flex h-full w-full max-w-[560px] flex-col tablet:max-w-[680px]"
+/** the room under the slider: what the 320px box in the middle of the screen leaves below it */
+const likertBelow = "h-[max(0px,calc((100%_-_320px)/2))] shrink-0"
 
 export function LikertScreen({
   screen,
@@ -363,7 +393,7 @@ export function LikertScreen({
   screen: Extract<Screen, { kind: "likert" }>
   compact: boolean
 }) {
-  const { part, item } = likertAt(screen)
+  const { part, item } = likertAt(screen, useLanguage().lang)
   return (
     <div className={likertBox}>
       <div data-scroll className={clsx("flex min-h-0 flex-1 flex-col overflow-y-auto", compact ? "pb-5" : "pb-8")}>
@@ -389,6 +419,7 @@ export function LikertScreen({
       </div>
       {/* the slider's place: the slider itself is in the Frame's dock */}
       <div aria-hidden className={clsx("shrink-0", likertSliderHeight(compact))} />
+      <div aria-hidden className={likertBelow} />
     </div>
   )
 }
@@ -405,7 +436,7 @@ export function LikertDock({
   onChoose: (value: number) => void
   compact: boolean
 }) {
-  const { part, item } = likertAt(screen)
+  const { part, item } = likertAt(screen, useLanguage().lang)
   return (
     <div className={clsx(likertBox, "justify-end")}>
       <div className="pointer-events-auto">
@@ -418,6 +449,7 @@ export function LikertDock({
           itemKey={item.id}
         />
       </div>
+      <div aria-hidden className={likertBelow} />
     </div>
   )
 }
@@ -431,7 +463,7 @@ export function PilotScreen({
   onChange: (text: string) => void
   compact: boolean
 }) {
-  const p = q.pilot_only
+  const p = useTexts().pilot_only
   return (
     <Column className={compact ? "gap-4" : "gap-6"}>
       <div className="flex flex-col gap-2">
@@ -465,6 +497,7 @@ export function ReviewScreen({
   onGoTo: (index: number) => void
   compact: boolean
 }) {
+  const t = useStrings()
   const shown = blanks.slice(0, MAX_REVIEW_TILES)
   return (
     <Column className="items-center gap-5 text-center">
@@ -475,24 +508,21 @@ export function ReviewScreen({
             compact ? "text-[24px]" : "text-[32px]",
           )}
         >
-          You’ve reached the end
+          {t.reachedEnd}
         </h1>
         <p className={clsx("font-medium text-pretty text-ink", reading(compact))}>
-          You answered {total - blanks.length} of {total} items.{" "}
-          {blanks.length === 0
-            ? "Press SUBMIT to send your answers."
-            : "Tap an item to answer it, or press SUBMIT."}
+          {t.answered(total - blanks.length, total)} {blanks.length === 0 ? t.pressSubmit : t.tapOrSubmit}
         </p>
       </div>
       {blanks.length > 0 && (
         <div className="flex flex-col items-center gap-3">
-          <Overline className="text-incorrect-ink">Left blank</Overline>
+          <Overline className="text-incorrect-ink">{t.leftBlank}</Overline>
           <ul className="flex flex-wrap justify-center gap-x-2 gap-y-3">
             {shown.map((b) => (
               <li key={b.index}>
                 <button
                   type="button"
-                  aria-label={`Go to item ${b.label}`}
+                  aria-label={t.goToItem(b.label)}
                   onClick={() => onGoTo(b.index)}
                   className={clsx(
                     "press flex h-[44px] min-w-[44px] items-center justify-center rounded-[8px] border px-2 text-[15px] font-[700] text-incorrect [--press-depth:4px]",

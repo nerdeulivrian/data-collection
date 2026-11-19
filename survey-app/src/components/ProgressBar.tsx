@@ -1,4 +1,5 @@
 import { motion } from "motion/react"
+import { useStrings } from "@/app/language"
 import { progressFill } from "@/design/motion"
 
 /**
@@ -6,11 +7,12 @@ import { progressFill } from "@/design/motion"
  * "reflection" pills and grows to each new width.
  */
 export function ProgressBar({ fraction }: { fraction: number }) {
+  const t = useStrings()
   const pct = Math.max(0, Math.min(1, fraction)) * 100
   return (
     <div
       role="progressbar"
-      aria-label="Progress"
+      aria-label={t.progress}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(pct)}

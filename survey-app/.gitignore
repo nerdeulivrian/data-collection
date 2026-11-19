@@ -4,3 +4,4 @@ dist
 .DS_Store
 .env*.local
 e2e-out
+filipino-review.html

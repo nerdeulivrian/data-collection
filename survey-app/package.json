@@ -12,6 +12,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "e2e": "node scripts/e2e.mjs",
+    "review-sheet": "node scripts/review_sheet.mjs",
     "questionnaire": "python3 -I scripts/form_to_questionnaire.py"
   },
   "dependencies": {

@@ -1,0 +1,531 @@
+{
+  "source": "The Filipino version of questionnaire.json, written by hand (scripts/form_to_questionnaire.py never touches it). Same shape, ids, counts and paragraph breaks as the English file; src/survey.test.ts checks that.",
+  "title": "Exploring English Word Retrieval Difficulties and Verbal Compensatory Strategies of Filipino Majors: A Needs Analysis",
+  "description": "Isang talatanungang pansarbey para sa mga mag-aaral ng BSEd Filipino ng College of Education, University of Southeastern Philippines.\n\nMga Mananaliksik: Armie Navarro, Reneil Ofilan, at Ian M. Quibete (BSEd English 3)\nTagapayo sa Pananaliksik: Mary Rose J. Ponce",
+  "age_check": {
+    "question": "Kayo ba ay 18 taong gulang o higit pa?",
+    "options": [
+      "Oo",
+      "Hindi"
+    ],
+    "stop_title": "Kailangan ang pahintulot ng magulang o tagapag-alaga",
+    "stop_message": "Mangyaring lumapit sa mga mananaliksik. Kailangan ninyo ang pahintulot ng inyong magulang o tagapag-alaga bago kayo sumagot."
+  },
+  "consent": {
+    "title": "Pahintulot na May Kabatiran",
+    "intro": "Nais namin kayong anyayahang lumahok sa pananaliksik na ito. Bago kayo magpasya, mahalagang mabatid ninyo kung bakit isinasagawa ang pananaliksik, kung ano ang nakapaloob sa inyong paglahok, at kung ano ang mga panganib at benepisyong kaugnay nito. Mangyaring maglaan ng panahon upang basahin ang pormularyong ito at magtanong sa amin kung mayroon pa kayong mga tanong o alalahanin. Ibibigay sa inyo ng mananaliksik ang mga sagot sa mga tanong na nakaitaliko upang matiyak na mas nauunawaan ninyo ang pananaliksik.",
+    "sections": [
+      {
+        "title": "Layunin ng Pananaliksik",
+        "body": "Layunin ng pag-aaral na ito na alamin ang mga kahirapan sa pag-alala ng salita (word retrieval difficulties) na nararanasan ng mga mag-aaral ng BSEd Filipino kapag nagsasalita sila sa Ingles at ang mga berbal na estratehiyang kompensatoryo (verbal compensatory strategies) na ginagamit nila upang harapin ang mga ito. Nangyayari ang kahirapan sa pag-alala ng salita kapag alam ninyo ang nais ninyong sabihin ngunit hindi ninyo maalala ang salitang Ingles na kailangan ninyo. Tinitingnan din ng pag-aaral ang mga sitwasyon sa pagsasalita na pinakamadalas pangyarihan ng mga kahirapang ito at ang mga gawain sa pagkatuto ng wika na mas gusto ng mga mag-aaral.\n\nMagsisilbing batayan ang mga resulta sa pagmumungkahi ng mga gawain sa pagkatuto ng wika na makatutulong sa mga mag-aaral ng BSEd Filipino na makapagsalita ng Ingles nang mas madali."
+      },
+      {
+        "title": "Pagpili ng mga Kalahok",
+        "body": "Inaanyayahan kayo dahil kayo ay mag-aaral ng BSEd Filipino ng USeP College of Education na ang unang wika ay isang wika ng Pilipinas, tulad ng Bisaya o Filipino. Random na pumili ang mga mananaliksik ng 16 na mag-aaral sa unang taon at 16 na mag-aaral sa ikalawang taon mula sa opisyal na talaan ng klase ng bawat taon upang magsilbing mga kalahok.\n\nAanyayahan din ng mga mananaliksik ang 10 mag-aaral ng BSEd Filipino sa ikatlong taon upang sagutan ang talatanungan sa pilot test nito. Sa pilot test, sinusuri kung malinaw ang mga aytem bago ang aktuwal na pangangalap ng datos."
+      },
+      {
+        "title": "Pamamaraan",
+        "body": "Kung papayag kayong lumahok, lalagdaan ninyo ang pormularyong ito at sasagutan ang isang talatanungang pansarbey na nakalimbag o online. May limang bahagi ang talatanungan. Hinihingi sa Bahagi I ang inyong propayl, tulad ng inyong edad, kasarian, taon sa kolehiyo, at kaligirang pangwika. Itinatanong sa Bahagi II hanggang IV kung gaano ninyo kadalas nararanasan ang mga kahirapan sa pag-alala ng salita kapag nagsasalita kayo sa Ingles, kung gaano ninyo kadalas ginagamit ang ilang estratehiya upang harapin ang mga ito, at kung sa aling mga sitwasyon sa pagsasalita nangyayari ang mga ito. Itinatanong sa Bahagi V kung aling mga gawain sa pagkatuto ng wika ang nais ninyo.\n\nSasagutin ninyo ang bawat aytem sa pagpili ng isang bilang sa eskalang may limang puntos. Walang tama o maling sagot, at may mananaliksik na naroroon upang ipaliwanag ang anumang aytem na hindi malinaw sa inyo. Kung wala pa kayong 18 taong gulang, kailangan ding magbigay ng nakasulat na pahintulot ang inyong magulang o tagapag-alaga bago kayo sumagot."
+      },
+      {
+        "title": "Tagal",
+        "body": "Sasagutan ang talatanungan sa isang upuan lamang, at tumatagal ito nang humigit-kumulang 10 hanggang 15 minuto. Gaganapin ang pilot test sa Nobyembre 18, 2026, at isasagawa ang aktuwal na pangangalap ng datos simula Nobyembre 19, 2026. Itatakda ng mga mananaliksik ang sesyon sa oras na hindi makaaabala sa inyong mga klase."
+      },
+      {
+        "title": "Mga Panganib",
+        "body": "Hindi hihigit sa minimal ang panganib na kaakibat ng pag-aaral na ito. May ilang aytem na nagtatanong tungkol sa mga sandaling nahihirapan kayong humanap ng mga salitang Ingles, na maaaring magdulot sa inyo ng bahagyang pagkailang. Maaari ninyong laktawan ang anumang aytem na ayaw ninyong sagutin, at maaari kayong huminto anumang oras."
+      },
+      {
+        "title": "Mga Benepisyo",
+        "body": "Hindi kayo tatanggap ng bayad o akademikong kredito sa inyong paglahok. Maaaring makatulong ang pagsagot sa talatanungan upang maging mas mulat kayo sa kung paano ninyo hinaharap ang mga kahirapan sa pag-alala ng salita kapag nagsasalita kayo sa Ingles. Makatutulong din ang mga resulta sa mga mananaliksik sa pagmumungkahi ng mga gawain sa pagkatuto ng wika na tumutugon sa mga pangangailangan ng mga mag-aaral ng BSEd Filipino."
+      },
+      {
+        "title": "Boluntaryong Paglahok",
+        "body": "Ganap na boluntaryo ang inyong paglahok. Maaari kayong tumangging lumahok, lumaktaw ng anumang aytem, o umatras anumang oras nang hindi nagbibigay ng dahilan at nang walang anumang parusa. Hindi makaaapekto ang inyong desisyon sa inyong mga marka o sa inyong katayuan sa College of Education."
+      },
+      {
+        "title": "Kumpidensiyalidad at Pamamahala ng Datos",
+        "body": "Pananatilihing kumpidensiyal ang inyong paglahok sa pananaliksik na ito sa abot ng ipinahihintulot ng batas.\n\nMangyaring ibigay ang inyong pangalan at tirahan at lumagda sa ibaba. Tandaan na pinananatiling anonimo ang lahat ng impormasyon, at hindi itinuturing na bahagi ng datos ang inyong pangalan. Para lamang ito sa mga rekord ng paaralan. Papalitan ng mga code ng kalahok ang mga pangalan at mga detalyeng mapagkakakilanlan, at lilimitahan sa mga mananaliksik at sa tagapayo sa pananaliksik ang akses sa mga nasagutang talatanungan at naka-encode na datos upang mapangalagaan ang inyong pagkakakilanlan at maiwasan ang paglalantad sa publiko.\n\nIuulat lamang ang inyong mga sagot sa anyong nakabuod. Ligtas na iimbakin ang mga talatanungan at naka-encode na datos at itatapon ang mga ito pagkatapos ng pag-aaral alinsunod sa mga kahingian ng institusyon. Pangangasiwaan ang lahat ng impormasyon alinsunod sa Data Privacy Act of 2012 (Republic Act No. 10173)."
+      },
+      {
+        "title": "Pagbabahagi ng mga Resulta",
+        "body": "Ilalahad ang mga resulta sa papel ng mga mananaliksik para sa EL 3113 Language Education Research at maaaring ibahagi sa College of Education. Tanging mga nakabuod na resulta ang iuulat, at walang indibidwal na sagot ang tutukuyin. Maaari kayong humingi sa mga mananaliksik ng buod ng mga natuklasan kapag natapos na ang pag-aaral."
+      },
+      {
+        "title": "Pahayag ng Pahintulot",
+        "body": "Sa paglagda sa ibaba, kinikilala ninyo na nabasa at naunawaan ninyo ang impormasyong ibinigay sa pormularyo ng pahintulot na ito, at kayo ay malaya at kusang-loob na pumapayag na lumahok sa pag-aaral na ito na ipinaliwanag sa inyo nina Armie Navarro, Reneil Ofilan, at Ian M. Quibete.\n\nNauunawaan ko na ang pagpayag na lumahok ay nangangahulugang:\n1. Sasagutan ko ang isang talatanungang pansarbey na matatapos sa loob ng humigit-kumulang 10 hanggang 15 minuto.\n2. Hindi lalabas ang aking pangalan sa anumang ulat ng mga resulta.\n3. Maaari akong lumaktaw ng anumang aytem o umatras sa pag-aaral anumang oras nang walang parusa."
+      }
+    ],
+    "data_use": {
+      "prompt": "Mangyaring lagyan ng tsek ang angkop na kahon:",
+      "options": [
+        "Maaaring gamitin ng mananaliksik sa iba pang proyektong pananaliksik na may pag-aprubang etikal ang impormasyong ibibigay ko, hangga’t aalisin ang aking pangalan at impormasyon sa pakikipag-ugnayan bago ito ibigay sa mga mananaliksik.",
+        "Hindi maaaring gamitin ng ibang mananaliksik ang impormasyong ibibigay ko nang hindi muna ako tinatanong.",
+        "Hindi maaaring gamitin ang impormasyong ibibigay ko maliban sa proyektong ito."
+      ]
+    },
+    "fields": {
+      "name": "Pangalan ng kalahok",
+      "signature": "Lagda (i-type ang inyong buong pangalan)",
+      "address": "Tirahan"
+    },
+    "agree": {
+      "question": "Pumapayag ba kayong lumahok sa pag-aaral na ito?",
+      "yes": "Oo, pumapayag ako",
+      "no": "Hindi, hindi ako pumapayag"
+    }
+  },
+  "letter": {
+    "greeting": "Mahal na Respondente,",
+    "body": "Kami ay mga mag-aaral ng BSEd English ng College of Education, University of Southeastern Philippines, at nagsasagawa kami ng pag-aaral na pinamagatang “Exploring English Word Retrieval Difficulties and Verbal Compensatory Strategies of Filipino Majors: A Needs Analysis.” Nagtatanong ang talatanungang ito tungkol sa mga sandaling hindi ninyo maalala ang isang salitang Ingles habang nagsasalita kayo, sa karaniwan ninyong ginagawa sa mga sandaling iyon, sa mga sitwasyong pinangyayarihan ng mga ito, at sa mga gawaing maaaring makatulong sa inyo. Makatutulong ang inyong mga sagot upang makapagmungkahi kami ng mga gawain sa pagkatuto ng wika para sa mga mag-aaral ng BSEd Filipino.\n\nWalang tama o maling sagot, at hindi makaaapekto ang inyong mga sagot sa inyong mga marka. Mangyaring sumagot nang tapat batay sa inyong sariling karanasan. Pananatilihing kumpidensiyal ang inyong mga sagot at gagamitin lamang ang mga ito para sa pag-aaral na ito, alinsunod sa Data Privacy Act of 2012 (Republic Act No. 10173). Tumatagal nang humigit-kumulang 10 hanggang 15 minuto ang pagsagot. Maaari kayong lumaktaw ng anumang tanong o huminto anumang oras nang walang parusa.\n\nSalamat sa inyong panahon at tulong.\n\nGumagalang,\nAng mga Mananaliksik"
+  },
+  "general_directions": {
+    "title": "Pangkalahatang Panuto",
+    "body": "May limang bahagi ang talatanungang ito. Basahin nang mabuti ang bawat pahayag at piliin ang sagot na pinakanaglalarawan sa inyo. Pumili ng isang sagot lamang para sa bawat pahayag.\n\nSa talatanungang ito, ang kahirapan sa pag-alala ng salita (word retrieval difficulty) ay isang sandaling alam ninyo ang nais ninyong sabihin sa Ingles ngunit hindi ninyo maalala sa oras na iyon ang salitang Ingles para dito."
+  },
+  "parts": [
+    {
+      "id": "P1",
+      "title": "Bahagi I. Propayl ng Respondente",
+      "directions": "Panuto: Mangyaring isulat ang inyong sagot o piliin ang opsiyong angkop sa inyo.",
+      "items": [
+        {
+          "n": 1,
+          "id": "P1_age",
+          "label": "Edad",
+          "type": "number"
+        },
+        {
+          "n": 2,
+          "id": "P1_sex",
+          "label": "Kasarian",
+          "type": "choice",
+          "options": [
+            "Babae",
+            "Lalaki",
+            "Mas gustong hindi sabihin"
+          ]
+        },
+        {
+          "n": 3,
+          "id": "P1_year",
+          "label": "Taon sa kolehiyo",
+          "type": "choice",
+          "options": [
+            "Unang taon",
+            "Ikalawang taon",
+            "Ikatlong taon (para sa pilot test lamang)"
+          ]
+        },
+        {
+          "n": 4,
+          "id": "P1_l1",
+          "label": "Unang wika, ang wikang una ninyong natutuhan sa tahanan",
+          "type": "choice",
+          "options": [
+            "Bisaya/Cebuano",
+            "Filipino/Tagalog",
+            "Ingles"
+          ],
+          "other": "P1_l1_other"
+        },
+        {
+          "n": 5,
+          "id": "P1_home",
+          "label": "Wikang pinakamadalas ninyong gamitin sa tahanan",
+          "type": "choice",
+          "options": [
+            "Bisaya/Cebuano",
+            "Filipino/Tagalog",
+            "Ingles"
+          ],
+          "other": "P1_home_other"
+        },
+        {
+          "n": 6,
+          "id": "P1_engfreq",
+          "label": "Gaano kayo kadalas magsalita ng Ingles sa labas ng inyong mga klase?",
+          "type": "choice",
+          "options": [
+            "Palagi",
+            "Madalas",
+            "Paminsan-minsan",
+            "Bihira",
+            "Hindi Kailanman"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Bahagi II. Ang Aking mga Kahirapan sa Pag-alala ng Salita",
+      "directions": "Panuto: Isipin ang mga pagkakataong nagsasalita kayo ng Ingles, sa klase at sa iba pang sitwasyon. Gaano kadalas nangyayari sa inyo ang isinasaad ng bawat pahayag? Pumili ng isang sagot para sa bawat pahayag.",
+      "stem": "Gaano kadalas nangyayari sa inyo ang isinasaad ng bawat pahayag?",
+      "scale": [
+        {
+          "value": 5,
+          "label": "Palagi"
+        },
+        {
+          "value": 4,
+          "label": "Madalas"
+        },
+        {
+          "value": 3,
+          "label": "Paminsan-minsan"
+        },
+        {
+          "value": 2,
+          "label": "Bihira"
+        },
+        {
+          "value": 1,
+          "label": "Hindi Kailanman"
+        }
+      ],
+      "items": [
+        {
+          "n": 1,
+          "id": "P2_01",
+          "text": "Kapag nagsasalita ako ng Ingles, hindi ko maalala ang salitang Ingles para sa nais kong sabihin."
+        },
+        {
+          "n": 2,
+          "id": "P2_02",
+          "text": "Kapag kailangan kong magsalita, nakalilimutan ko ang mga salitang Ingles na alam ko."
+        },
+        {
+          "n": 3,
+          "id": "P2_03",
+          "text": "Kapag kinakabahan ako habang nagsasalita sa klase, nakalilimutan ko ang mga salitang Ingles na alam ko."
+        },
+        {
+          "n": 4,
+          "id": "P2_04",
+          "text": "Nararamdaman kong nasa dulo ng aking dila ang isang salitang Ingles."
+        },
+        {
+          "n": 5,
+          "id": "P2_05",
+          "text": "Naaalala ko lamang ang salitang kinailangan ko kapag tapos na akong magsalita."
+        },
+        {
+          "n": 6,
+          "id": "P2_06",
+          "text": "Humihinto ako nang matagal habang naghahanap ako ng isang salitang Ingles."
+        },
+        {
+          "n": 7,
+          "id": "P2_07",
+          "text": "Habang naghahanap ako ng salita, bumibigkas ako ng mga tunog tulad ng “ahm,” “uh,” o “kanang.”"
+        },
+        {
+          "n": 8,
+          "id": "P2_08",
+          "text": "Nahihirapan akong mabilis na ipahayag sa mga salita ang nais kong sabihin."
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Bahagi III. Ang Ginagawa Ko Kapag Hindi Ko Maalala ang Isang Salitang Ingles",
+      "directions": "Panuto: Isipin kung ano ang karaniwan ninyong ginagawa kapag hindi ninyo maalala ang isang salitang Ingles habang nagsasalita kayo. Gaano ninyo kadalas ginagawa ang bawat isa sa mga sumusunod? Pumili ng isang sagot para sa bawat pahayag.",
+      "stem": "Kapag hindi ko maalala ang isang salitang Ingles habang nagsasalita ako, . . .",
+      "scale": [
+        {
+          "value": 5,
+          "label": "Palagi"
+        },
+        {
+          "value": 4,
+          "label": "Madalas"
+        },
+        {
+          "value": 3,
+          "label": "Paminsan-minsan"
+        },
+        {
+          "value": 2,
+          "label": "Bihira"
+        },
+        {
+          "value": 1,
+          "label": "Hindi Kailanman"
+        }
+      ],
+      "items": [
+        {
+          "n": 1,
+          "id": "P3_01",
+          "text": "Inilalarawan ko ang pisikal na anyo ng bagay sa halip na gamitin ang eksaktong salita."
+        },
+        {
+          "n": 2,
+          "id": "P3_02",
+          "text": "Gumagamit ako ng salita o parirala na halos pareho ang kahulugan."
+        },
+        {
+          "n": 3,
+          "id": "P3_03",
+          "text": "Nag-iimbento ako ng bagong salita bilang kapalit ng salitang hindi ko maalala."
+        },
+        {
+          "n": 4,
+          "id": "P3_04",
+          "text": "Humihingi ako ng tulong sa kausap ko tungkol sa salita."
+        },
+        {
+          "n": 5,
+          "id": "P3_05",
+          "text": "Gumagamit ako ng mga parirala tulad ng “How do I say this?” o “Let me think” upang magkaroon ako ng panahong maalala ang salita."
+        },
+        {
+          "n": 6,
+          "id": "P3_06",
+          "text": "Gumagamit ako ng salitang Bisaya o Filipino kapag hindi ko maisip ang salitang Ingles, halimbawa, “Can you pass the takure?”"
+        },
+        {
+          "n": 7,
+          "id": "P3_07",
+          "text": "Iniiwan kong hindi tapos ang aking pangungusap dahil sa ilang kahirapan sa wika."
+        },
+        {
+          "n": 8,
+          "id": "P3_08",
+          "text": "Ipinaliliwanag ko kung para saan ginagamit ang bagay, halimbawa, “the thing we use to boil water for coffee” para sa kettle."
+        },
+        {
+          "n": 9,
+          "id": "P3_09",
+          "text": "Gumagamit ako ng mas pangkalahatang salita na malapit ang kahulugan, halimbawa, “fruit” para sa pomelo o “pot” para sa kettle."
+        },
+        {
+          "n": 10,
+          "id": "P3_10",
+          "text": "Lumilikha ako ng bagong salita sa pamamagitan ng pagsasama ng mga salitang Ingles na alam ko, halimbawa, “airball” para sa balloon."
+        },
+        {
+          "n": 11,
+          "id": "P3_11",
+          "text": "Humihingi ako ng tulong sa ibang tao kapag hindi ko masabi ang ibig kong sabihin."
+        },
+        {
+          "n": 12,
+          "id": "P3_12",
+          "text": "Gumagamit ako ng mga ekspresyon tulad ng “well,” “you know,” o “I mean” upang patuloy na makapagsalita habang hinahanap ko ang salita."
+        },
+        {
+          "n": 13,
+          "id": "P3_13",
+          "text": "Lumilipat ako sandali sa Bisaya o Filipino kung alam kong naiintindihan ito ng kausap ko."
+        },
+        {
+          "n": 14,
+          "id": "P3_14",
+          "text": "Sumusuko ako kapag hindi ko maipaunawa ang ibig kong sabihin."
+        },
+        {
+          "n": 15,
+          "id": "P3_15",
+          "text": "Nagbibigay ako ng mga halimbawa upang ipaliwanag ang salitang tinutukoy ko, tulad ng “spoon and fork” para sa utensils."
+        },
+        {
+          "n": 16,
+          "id": "P3_16",
+          "text": "Naghahanap ako ng ibang paraan upang ipahayag ang ideya, tulad ng paggamit ng kasingkahulugan."
+        },
+        {
+          "n": 17,
+          "id": "P3_17",
+          "text": "Nanghuhula ako ng salitang sa palagay ko ay maaaring tama."
+        },
+        {
+          "n": 18,
+          "id": "P3_18",
+          "text": "Gumagamit ako ng pataas na tono, na parang nagtatanong, upang tulungan ako ng aking tagapakinig sa salita."
+        },
+        {
+          "n": 19,
+          "id": "P3_19",
+          "text": "Gumagamit ako ng mga salita o pariralang pampuno (filler) upang mapanatili ang aking pagkakataong magsalita habang iniisip ko ang sasabihin ko."
+        },
+        {
+          "n": 20,
+          "id": "P3_20",
+          "text": "Hinahaluan ko ng mga salita mula sa aking unang wika ang aking pangungusap sa Ingles upang maiparating ang ibig kong sabihin."
+        },
+        {
+          "n": 21,
+          "id": "P3_21",
+          "text": "Nagsasabi lamang ako ng kaunting salita sa halip na ang binalak kong sabihin."
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "title": "Bahagi IV. Mga Sitwasyong Nahihirapan Akong Maalala ang mga Salitang Ingles",
+      "directions": "Panuto: Gaano kayo kadalas nahihirapang maalala ang mga salitang Ingles sa bawat isa sa mga sumusunod na sitwasyon? Pumili ng isang sagot para sa bawat pahayag.",
+      "stem": "Nahihirapan akong maalala ang mga salitang Ingles kapag . . .",
+      "scale": [
+        {
+          "value": 5,
+          "label": "Palagi"
+        },
+        {
+          "value": 4,
+          "label": "Madalas"
+        },
+        {
+          "value": 3,
+          "label": "Paminsan-minsan"
+        },
+        {
+          "value": 2,
+          "label": "Bihira"
+        },
+        {
+          "value": 1,
+          "label": "Hindi Kailanman"
+        }
+      ],
+      "items": [
+        {
+          "n": 1,
+          "id": "P4_01",
+          "text": "Nagre-recite ako sa klase para sa marka."
+        },
+        {
+          "n": 2,
+          "id": "P4_02",
+          "text": "Tinatawag ako upang sumagot nang walang paunang abiso."
+        },
+        {
+          "n": 3,
+          "id": "P4_03",
+          "text": "Nagsasalita ako nang walang paghahanda, tulad ng sa biglaang talumpati (impromptu speech)."
+        },
+        {
+          "n": 4,
+          "id": "P4_04",
+          "text": "Nagbibigay ako ng pasalitang ulat o presentasyon sa harap ng klase."
+        },
+        {
+          "n": 5,
+          "id": "P4_05",
+          "text": "Kumukuha ako ng pasalitang pagsusulit o ng pagsusulit sa pagsasalita na may marka."
+        },
+        {
+          "n": 6,
+          "id": "P4_06",
+          "text": "Maikli lamang ang panahon ko upang sumagot."
+        },
+        {
+          "n": 7,
+          "id": "P4_07",
+          "text": "Sumasali ako sa isang pangkatang talakayan sa Ingles."
+        },
+        {
+          "n": 8,
+          "id": "P4_08",
+          "text": "Nakikipag-usap ako sa Ingles sa isang guro."
+        },
+        {
+          "n": 9,
+          "id": "P4_09",
+          "text": "Nakikipag-usap ako sa Ingles sa mga kaklase o kaibigan sa labas ng klase."
+        },
+        {
+          "n": 10,
+          "id": "P4_10",
+          "text": "Nakikipag-usap ako sa Ingles sa isang taong hindi ko gaanong kilala."
+        }
+      ]
+    },
+    {
+      "id": "P5",
+      "title": "Bahagi V. Mga Gawaing Makatutulong sa Akin",
+      "directions": "Panuto: Magmumungkahi ang mga mananaliksik ng mga gawaing makatutulong sa mga mag-aaral kapag hindi nila maalala ang mga salitang Ingles habang nagsasalita. Basahin ang bawat pahayag at piliin ang sagot na nagpapakita kung gaano kayo sumasang-ayon. Sumagot batay sa inyong sariling mga pangangailangan, dahil maaaring magkakaiba ang mga gawaing kailangan ng mga mag-aaral.",
+      "stem": "Gaano kayo sumasang-ayon sa bawat pahayag?",
+      "scale": [
+        {
+          "value": 5,
+          "label": "Lubos na Sang-ayon"
+        },
+        {
+          "value": 4,
+          "label": "Sang-ayon"
+        },
+        {
+          "value": 3,
+          "label": "Neutral"
+        },
+        {
+          "value": 2,
+          "label": "Hindi Sang-ayon"
+        },
+        {
+          "value": 1,
+          "label": "Lubos na Hindi Sang-ayon"
+        }
+      ],
+      "items": [
+        {
+          "n": 1,
+          "id": "P5_01",
+          "text": "Nais ko ng mga araling nagtuturo sa akin kung ano ang gagawin kapag nakalimutan ko ang isang salitang Ingles, tulad ng paglalarawan dito o paggamit ng katulad na salita."
+        },
+        {
+          "n": 2,
+          "id": "P5_02",
+          "text": "Nais kong matutuhan ang mga pariralang Ingles na nagbibigay sa akin ng panahong mag-isip, tulad ng “How do I say this?” o “Let me think.”"
+        },
+        {
+          "n": 3,
+          "id": "P5_03",
+          "text": "Nais kong magsanay sa paglalarawan ng mga larawan o bagay upang mahulaan ang mga ito ng isang kapareha."
+        },
+        {
+          "n": 4,
+          "id": "P5_04",
+          "text": "Nais kong magsanay sa pagsasalita sa pamamagitan ng mga gawaing role-play at simulasyon."
+        },
+        {
+          "n": 5,
+          "id": "P5_05",
+          "text": "Nais kong matuto ng pagsasalita sa pamamagitan ng mga larong pang-edukasyon."
+        },
+        {
+          "n": 6,
+          "id": "P5_06",
+          "text": "Nais kong magsanay sa pagbibigay ng maiikling biglaang talumpati (impromptu talks) tungkol sa mga pang-araw-araw na paksa."
+        },
+        {
+          "n": 7,
+          "id": "P5_07",
+          "text": "Nais kong manood o makinig ng mga huwarang pag-uusap na nagpapakita kung paano hinaharap ng mga tagapagsalita ang isang nakalimutang salita."
+        },
+        {
+          "n": 8,
+          "id": "P5_08",
+          "text": "Nais kong makatanggap ng agarang feedback mula sa aking guro pagkatapos kong magsalita."
+        },
+        {
+          "n": 9,
+          "id": "P5_09",
+          "text": "Makikinabang ako sa pagsasanay sa pagsasalita kasama ang isang kapareha o sa isang maliit na pangkat."
+        },
+        {
+          "n": 10,
+          "id": "P5_10",
+          "text": "Makikinabang ako sa pagsasanay sa pagsasalita nang mag-isa."
+        }
+      ]
+    }
+  ],
+  "pilot_only": {
+    "title": "Para Lamang sa mga Respondente ng Pilot Test",
+    "intro": "Kung sumasagot kayo bilang bahagi ng pilot test, mangyaring ipaalam sa amin ang anumang aytem na hindi malinaw.",
+    "question": "Mayroon bang mga pahayag o panuto na hindi malinaw o mahirap sagutin? Mangyaring isulat ang bahagi at bilang ng aytem at kung ano ang nakalito sa inyo."
+  },
+  "closing_message": "Salamat sa pagsagot sa talatanungan."
+}

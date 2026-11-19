@@ -1,13 +1,15 @@
 import { Check, Hand, Undo2 } from "lucide-react"
 import { AnimatePresence } from "motion/react"
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { useLanguage } from "@/app/language"
 import { useTapSink } from "@/app/tapPress"
 import { useBreakpoint } from "@/app/useBreakpoint"
-import { api, errorMessage } from "@/api"
+import { api, errorKind } from "@/api"
 import { OTHER } from "@/components/Answers"
 import { Toast } from "@/components/Bits"
 import { BlanksDialog, ConfirmDialog } from "@/components/Dialogs"
 import { forgetSession, loadSession, newSession, saveSession, type Session } from "@/storage"
+import { strings, type Strings } from "@/strings"
 import {
   askedCount,
   blanks,
@@ -20,6 +22,7 @@ import {
   partName,
   profile,
   q,
+  texts,
   type Screen,
 } from "@/survey"
 import { Frame, type BarButton } from "./Frame"
@@ -28,8 +31,10 @@ import * as S from "./screens"
 /** where the respondent is: the start screen, the questionnaire, or one of its three ends */
 type View = "start" | "flow" | "minor" | "declined" | "done"
 type Dialog = "exit" | "decline" | "blanks" | "restart" | null
+/** a toast is kept as which message it is, so it changes language with the rest */
+type ToastKind = Extract<keyof Strings, "notSent" | "noNetwork" | "wentWrong">
 
-function chipFor(screen: Screen): string {
+function chipFor(screen: Screen, t: Strings): string {
   switch (screen.kind) {
     // only the parts and the pilot's question have a name in the strip (Ian, 2026-11-19)
     case "age":
@@ -39,13 +44,13 @@ function chipFor(screen: Screen): string {
     case "review":
       return ""
     case "partIntro":
-      return `Part ${partName(q.parts[screen.part].title).roman}`
+      return t.part(partName(q.parts[screen.part].title).roman)
     case "profile":
-      return `Part ${partName(profile.title).roman}`
+      return t.part(partName(profile.title).roman)
     case "likert":
-      return `Part ${partName(likertParts[screen.part - 1].title).roman}`
+      return t.part(partName(likertParts[screen.part - 1].title).roman)
     case "pilot":
-      return "Pilot test"
+      return t.pilotTest
   }
 }
 
@@ -53,6 +58,11 @@ export function App() {
   useTapSink()
   const layout = useBreakpoint()
   const compact = layout === "mobile"
+  // English or Filipino (Ian, 2026-11-19): `t` is the app's own words, `tx` the questionnaire's.
+  // What is saved and compared stays English (`q`), whatever is shown
+  const { lang } = useLanguage()
+  const t = strings[lang]
+  const tx = texts[lang]
 
   // a questionnaire left open on this phone (a reload, a closed tab) picks up where it was; one
   // left with EXIT waits on the start screen
@@ -64,15 +74,16 @@ export function App() {
   /** opened as …/?test: a test run, kept apart from the real answers */
   const [testLink] = useState(() => new URLSearchParams(window.location.search).has("test"))
   const [dialog, setDialog] = useState<Dialog>(null)
-  const [toast, setToast] = useState<string | null>(null)
+  const [toast, setToast] = useState<ToastKind | null>(null)
   /** the respondent came to this item from the review: NEXT reads REVIEW and goes straight back */
   const [fromReview, setFromReview] = useState(false)
   /** the bar on an end screen: where the respondent stopped, and full once the answers are sent */
   const [endProgress, setEndProgress] = useState(0)
 
-  // the pilot's question joins the flow once the respondent picks the pilot's year level
+  // the pilot's question joins the flow once the respondent picks the pilot's year level. The flow
+  // has the same screens in either language, so `at` means the same screen after a switch
   const pilot = session ? isPilot(session.answers) : false
-  const flow = useMemo(() => buildFlow(pilot), [pilot])
+  const flow = useMemo(() => buildFlow(pilot, lang), [pilot, lang])
   const at = session ? Math.min(session.at, flow.length - 1) : 0
   const flowProgress = flow.length > 1 ? at / (flow.length - 1) : 0
   const screen: Screen | null = view === "flow" && session ? flow[at] : null
@@ -150,10 +161,11 @@ export function App() {
       signature: session.signature.trim(),
       address: session.address.trim(),
       data_use: session.dataUse,
+      language: lang,
     })
     setBusy(false)
     if (!r.ok) {
-      setToast(errorMessage(r.error))
+      setToast(errorKind(r.error))
       return
     }
     setDirection(1)
@@ -186,6 +198,7 @@ export function App() {
       group: groupOf(answers, session.test),
       answers,
       elapsed_ms: session.startedAt ? Date.now() - session.startedAt : 0,
+      language: lang,
     })
     setBusy(false)
     if (r.ok) {
@@ -193,11 +206,7 @@ export function App() {
       finish("done")
       return
     }
-    setToast(
-      r.error === "network"
-        ? "Not sent: no connection. Your answers are still on this phone. Try SUBMIT again."
-        : errorMessage(r.error),
-    )
+    setToast(r.error === "network" ? "notSent" : errorKind(r.error))
   }
 
   const jumpTo = (index: number) => {
@@ -219,7 +228,7 @@ export function App() {
   let right: BarButton
   let body: ReactNode
   const backButton = (disabled = false): BarButton => ({
-    label: "Back",
+    label: t.back,
     tone: "outline",
     onClick: back,
     disabled,
@@ -227,33 +236,33 @@ export function App() {
 
   if (view === "flow" && session && screen) {
     key = `flow-${at}`
-    top = { chip: chipFor(screen), onExit: () => setDialog("exit") }
+    top = { chip: chipFor(screen, t), onExit: () => setDialog("exit") }
     // the count above the progress bar: a section's pages, Part I's items, each Likert part's items
     if (screen.kind === "read" && screen.pages > 1)
-      pageCount = { group: screen.section, text: `Page ${screen.page} of ${screen.pages}` }
+      pageCount = { group: screen.section, text: t.pageOf(screen.page, screen.pages) }
     // where the consent form is signed, the date it is signed on
-    else if (screen.kind === "sign") pageCount = { group: "sign", text: S.today() }
+    else if (screen.kind === "sign") pageCount = { group: "sign", text: t.date(new Date()) }
     else if (screen.kind === "profile")
-      pageCount = { group: "profile", text: `${screen.ordinal} of ${screen.of}` }
+      pageCount = { group: "profile", text: t.itemOf(screen.ordinal, screen.of) }
     else if (screen.kind === "likert") {
       const { part, item } = likertAt(screen)
-      pageCount = { group: `part-${screen.part}`, text: `${item.n} of ${part.items.length}` }
+      pageCount = { group: `part-${screen.part}`, text: t.itemOf(item.n, part.items.length) }
     }
     progress = flowProgress
     const nextButton: BarButton =
       fromReview && (screen.kind === "likert" || screen.kind === "profile")
         ? {
-            label: "Review",
+            label: t.review,
             onClick: () => {
               setFromReview(false)
               goTo(reviewIndex, 1)
             },
           }
-        : { label: "Next", onClick: next }
+        : { label: t.next, onClick: next }
     switch (screen.kind) {
       case "age":
         left = {
-          label: "Back",
+          label: t.back,
           tone: "outline",
           onClick: () => {
             forgetSession()
@@ -261,7 +270,7 @@ export function App() {
           },
         }
         right = {
-          label: "Next",
+          label: t.next,
           disabled: !session.age,
           onClick: () => {
             if (session.age === q.age_check.options[1]) {
@@ -279,7 +288,7 @@ export function App() {
         break
       case "dataUse":
         left = backButton()
-        right = { label: "Next", onClick: next, disabled: session.dataUse.length === 0 }
+        right = { label: t.next, onClick: next, disabled: session.dataUse.length === 0 }
         body = (
           <S.DataUseScreen
             values={session.dataUse}
@@ -297,7 +306,7 @@ export function App() {
       case "sign":
         left = backButton()
         right = {
-          label: busy ? "Saving…" : q.consent.agree.yes,
+          label: busy ? t.saving : tx.consent.agree.yes,
           onClick: agree,
           disabled: busy || !session.name.trim() || !session.signature.trim(),
           grow: true,
@@ -359,7 +368,7 @@ export function App() {
         const missing = blanks(flow, session.answers)
         left = backButton()
         right = {
-          label: busy ? "Sending…" : "Submit",
+          label: busy ? t.sending : t.submit,
           disabled: busy,
           onClick: () => (missing.length ? setDialog("blanks") : submit()),
         }
@@ -372,29 +381,23 @@ export function App() {
   } else if (view === "minor" || view === "declined" || view === "done") {
     key = view
     progress = endProgress
-    right = { label: view === "done" ? "Done" : "OK", onClick: () => finish("start") }
+    right = { label: view === "done" ? t.done : t.ok, onClick: () => finish("start") }
     body =
       view === "done" ? (
-        <S.EndScreen icon={Check} tone="brand" title={q.closing_message} body="Your answers have been sent." compact={compact} />
+        <S.EndScreen icon={Check} tone="brand" title={tx.closing_message} body={t.sent} compact={compact} />
       ) : view === "minor" ? (
-        <S.EndScreen icon={Hand} tone="quiet" title={q.age_check.stop_title} body={q.age_check.stop_message} compact={compact} />
+        <S.EndScreen icon={Hand} tone="quiet" title={tx.age_check.stop_title} body={tx.age_check.stop_message} compact={compact} />
       ) : (
-        <S.EndScreen
-          icon={Undo2}
-          tone="quiet"
-          title="You chose not to take part"
-          body="Nothing you entered was saved. Thank you for your time."
-          compact={compact}
-        />
+        <S.EndScreen icon={Undo2} tone="quiet" title={t.declinedTitle} body={t.declinedBody} compact={compact} />
       )
   } else {
     key = "start"
     const waiting = session?.paused ? session : null
     if (waiting) {
-      left = { label: "Start over", tone: "outline", onClick: () => setDialog("restart") }
-      right = { label: "Continue", onClick: begin }
+      left = { label: t.startOver, tone: "outline", onClick: () => setDialog("restart") }
+      right = { label: t.continue, onClick: begin }
     } else {
-      right = { label: "Start", onClick: begin }
+      right = { label: t.start, onClick: begin }
     }
     body = (
       <S.StartScreen waiting={waiting !== null} test={waiting ? waiting.test : testLink} compact={compact} />
@@ -477,14 +480,10 @@ export function App() {
         {dialog === "exit" && session && (
           <ConfirmDialog
             key="exit"
-            title={session.consented ? "Take a break?" : "Leave now?"}
-            body={
-              session.consented
-                ? "Your answers stay on this phone. Open this page again on this phone to pick up where you left off."
-                : "Nothing has been saved yet."
-            }
-            stay="Keep going"
-            leave="Leave"
+            title={session.consented ? t.breakTitle : t.leaveTitle}
+            body={session.consented ? t.breakBody : t.leaveBody}
+            stay={t.keepGoing}
+            leave={t.leave}
             onStay={() => setDialog(null)}
             onLeave={() => {
               if (session.consented) {
@@ -501,10 +500,10 @@ export function App() {
         {dialog === "restart" && (
           <ConfirmDialog
             key="restart"
-            title="Start over?"
-            body="The answers saved on this phone will be deleted, and a new questionnaire begins."
-            stay="Go back"
-            leave="Start over"
+            title={t.restartTitle}
+            body={t.restartBody}
+            stay={t.goBack}
+            leave={t.restartLeave}
             onStay={() => setDialog(null)}
             onLeave={startOver}
           />
@@ -514,10 +513,10 @@ export function App() {
         {dialog === "decline" && session && (
           <ConfirmDialog
             key="decline"
-            title="End without taking part?"
-            body="Nothing you entered will be saved."
-            stay="Go back"
-            leave="End"
+            title={t.declineTitle}
+            body={t.declineBody}
+            stay={t.goBack}
+            leave={t.declineLeave}
             onStay={() => setDialog(null)}
             onLeave={() => {
               forgetSession()
@@ -538,7 +537,7 @@ export function App() {
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {toast && <Toast key={toast} message={toast} onDone={() => setToast(null)} />}
+        {toast && <Toast key={toast} message={t[toast]} onDone={() => setToast(null)} />}
       </AnimatePresence>
     </>
   )

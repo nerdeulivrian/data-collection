@@ -2,11 +2,15 @@ import clsx from "clsx"
 import { Check } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState, type KeyboardEvent, type PointerEvent } from "react"
+import { useStrings } from "@/app/language"
 import { popIn, presence, usePrefersReducedMotion } from "@/design/motion"
 import { look } from "./optionStyles"
 import { TextField } from "./TextField"
 
-/** the extra option on Part I items 5 and 6, as the form has it */
+/**
+ * The extra option on Part I items 5 and 6, as the form has it. This is the answer saved, in either
+ * language; what the card reads in Filipino comes with `shownAs`.
+ */
 export const OTHER = "Other"
 
 /**
@@ -38,6 +42,7 @@ export function ChoiceCards({
   /** one card under another at every width, in a narrower column from a tablet up */
   stacked?: boolean
 }) {
+  const t = useStrings()
   const all = other ? [...options, OTHER] : options
   return (
     <div className="flex w-full flex-col gap-4">
@@ -93,7 +98,7 @@ export function ChoiceCards({
       {other && value === OTHER && (
         <TextField
           id="other"
-          label="Please specify"
+          label={t.specify}
           value={other.value}
           onChange={other.onChange}
           autoFocus
@@ -263,6 +268,8 @@ export function LikertSlider({
       />
       {scale.map((step, i) => {
         const picked = i === index
+        // the Filipino linker "na" stays with the word before it ("Lubos na"), never at the start of a line
+        const words = step.label.replace(/ na /g, "\u00a0na ").split(" ")
         return (
           <button
             key={step.value}
@@ -281,12 +288,14 @@ export function LikertSlider({
                 picked ? "text-brand" : "text-ink-soft",
               )}
             >
-              {/* a label of two words stands on two lines at every width ("Strongly / Agree") */}
-              {step.label.split(" ").length === 2 ? (
+              {/* a label of two or three words stands on two lines at every width, its last word
+                  on the second ("Strongly / Agree", "Lubos na / Sang-ayon", "Lubos na Hindi /
+                  Sang-ayon", whose first line wraps again on a small phone); a longer one wraps */}
+              {words.length === 2 || words.length === 3 ? (
                 <>
-                  {step.label.split(" ")[0]}
+                  {words.slice(0, -1).join(" ")}
                   <br />
-                  {step.label.split(" ")[1]}
+                  {words.at(-1)}
                 </>
               ) : (
                 step.label

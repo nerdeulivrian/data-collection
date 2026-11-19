@@ -4,7 +4,9 @@
  * (360 × 640) and as a first year on a laptop, takes a break and comes back, declines, checks that
  * no question screen needs scrolling, that the Likert slider stays in its place and starts every
  * item with nothing picked, that the rows land in the right tabs, and that the researchers' page
- * counts them and exports them. Screenshots go to e2e-out/.
+ * counts them and exports them. Then the same questionnaire in Filipino (a second year on a
+ * phone): every screen in Filipino, the switch in the middle of a part and back, the language
+ * remembered, and a row saved exactly as an English one is. Screenshots go to e2e-out/.
  *
  *   node scripts/e2e.mjs            (or pnpm e2e)
  */
@@ -52,16 +54,33 @@ async function clickNext(page) {
   await settle(page)
 }
 
+/** the words the walk finds its way by, in each language */
+const WORDS = {
+  en: { yes: "Yes", end: "reached the end", other: "Other" },
+  fil: { yes: "Oo", end: "Narating na ninyo ang dulo", other: "Iba pa" },
+}
+
+/** the language switch in the strip: its two buttons are named "English" and "Filipino" */
+async function switchTo(page, name) {
+  await page.getByRole("button", { name, exact: true }).click()
+  await page.waitForTimeout(120)
+}
+
 /**
  * Walks the questionnaire from the start screen to the review. `pick(itemId)` says what to
- * answer (null = leave it blank).
+ * answer (null = leave it blank). With `lang: "fil"` it switches to Filipino on the start screen
+ * and goes by the Filipino words. `onScreen` runs on every screen before it is answered, and
+ * `afterPick` after a Likert answer is picked.
  */
-async function walk(page, { pick, shots }) {
+async function walk(page, { pick, shots, lang = "en", onScreen, afterPick }) {
+  const W = WORDS[lang]
   const scrolled = []
   /** where the Likert slider's top is, on every item: one place only */
   const sliderAt = new Set()
   let likertItems = 0
   await page.goto(base + "/")
+  if (lang === "fil") await switchTo(page, "Filipino")
+  await onScreen?.("start")
   await shots?.("01-start")
   await clickNext(page)
   let guard = 0
@@ -77,9 +96,10 @@ async function walk(page, { pick, shots }) {
         await shots(`${String(shotKinds.size + 1).padStart(2, "0")}-${kind}`)
       }
     }
-    if (await page.getByRole("radio", { name: "Yes", exact: true }).count()) {
+    await onScreen?.(`${chip} "${heading.slice(0, 40)}"`)
+    if (await page.getByRole("radio", { name: W.yes, exact: true }).count()) {
       await snap("age")
-      await page.getByRole("radio", { name: "Yes", exact: true }).click()
+      await page.getByRole("radio", { name: W.yes, exact: true }).click()
       await clickNext(page)
       continue
     }
@@ -106,7 +126,7 @@ async function walk(page, { pick, shots }) {
       await clickNext(page)
       continue
     }
-    if (heading.includes("reached the end")) {
+    if (heading.includes(W.end)) {
       await snap("review")
       if (sliderAt.size > 1) fail(`the Likert slider moved from item to item: its top was at ${[...sliderAt].join(", ")}px`)
       return { scrolled }
@@ -132,6 +152,7 @@ async function walk(page, { pick, shots }) {
         } else await page.locator(`[role="radiogroup"] button[aria-label^="${value} "]`).last().click()
         const got = await page.locator('[role="radio"][aria-checked="true"]').getAttribute("aria-label")
         if (!got?.startsWith(`${value} `)) fail(`${chip} "${heading.slice(0, 40)}": picked ${value}, the slider says ${got}`)
+        await afterPick?.({ chip, heading, value, n: likertItems })
       }
       await snap(`likert-${chip.replace(/\s+/g, "")}`)
       await clickNext(page)
@@ -144,9 +165,9 @@ async function walk(page, { pick, shots }) {
       const v = pick(heading)
       if (v) {
         await page.getByRole("radio", { name: v, exact: true }).last().click()
-        if (v === "Other") await page.locator("#other").fill("Mandaya")
+        if (v === W.other) await page.locator("#other").fill("Mandaya")
       }
-      await snap(v === "Other" ? "profile-other" : "profile-choice")
+      await snap(v === W.other ? "profile-other" : "profile-choice")
       await clickNext(page)
       continue
     }
@@ -228,6 +249,7 @@ try {
     const likert = Object.keys(row).filter((k) => /^P[2-5]_/.test(k))
     if (likert.length !== 49 || likert.some((k) => ![1, 2, 3, 4, 5].includes(row[k]))) fail("not all 49 Likert answers were saved as 1–5")
     if (!(row.duration_min > 0)) fail(`duration_min is ${row.duration_min}`)
+    if (row.language !== "en" || consent?.language !== "en") fail(`the language saved is ${row.language} (answers) and ${consent?.language} (consent), expected en`)
     if (consent?.name !== "Maria Santos" || consent.data_use_1 !== "Yes" || consent.data_use_2 !== "No" || consent.data_use_3 !== "Yes") fail(`consent row: ${JSON.stringify(consent)}`)
     if (JSON.stringify(book.responses).includes("Maria")) fail("the name reached the responses tab")
     console.log(`  saved: ${likert.length} Likert answers, duration ${row.duration_min} min, consent kept apart`)
@@ -298,6 +320,151 @@ try {
     const blanksLeft = Object.entries(row).filter(([k, v]) => /^P[2-5]_/.test(k) && v === "").map(([k]) => k)
     if (blanksLeft.length !== 1) fail(`expected one blank Likert answer, got ${blanksLeft}`)
     console.log(`  submitted with ${blanksLeft} left blank, as allowed`)
+    await ctx.close()
+  }
+
+  /* ---------- a second year on a small phone, in Filipino from the start screen to SUBMIT ---------- */
+  console.log("second-year respondent in Filipino, 360 × 640 phone")
+  {
+    const { ctx, page } = await context({ width: 360, height: 640 })
+    let n = 0
+    const shots = (name) => page.screenshot({ path: `${out}fil-${name}.png` })
+    // the cards' Filipino words; the answers saved are the form's English ones
+    const answersByScreen = {
+      Kasarian: "Lalaki",
+      "Taon sa kolehiyo": "Ikalawang taon",
+      "Unang wika, ang wikang una ninyong natutuhan sa tahanan": "Iba pa",
+      "Wikang pinakamadalas ninyong gamitin sa tahanan": "Ingles",
+      "Gaano kayo kadalas magsalita ng Ingles sa labas ng inyong mga klase?": "Hindi Kailanman",
+    }
+    const pick = (key) => answersByScreen[key] ?? String(((n++ % 5) + 1))
+    // the app's and the form's English words: none may show while the questionnaire is in Filipino.
+    // (What stays English has none of them: the study's title, the names, the examples inside items.)
+    const english = /\b(next|back|review|submit|start|continue|exit|progress|page \d|part [ivx]+|\d+ of \d+|always|often|sometimes|rarely|never|agree|disagree|yes|directions|please|other|female|male|year|items?|blank|answers?|november)\b/i
+    const onScreen = async (where) => {
+      const seen = await page.evaluate(() => {
+        const labels = [...document.querySelectorAll("[aria-label], [title]")].map((e) => e.getAttribute("aria-label") ?? e.getAttribute("title"))
+        return { text: [document.querySelector("#root").innerText, ...labels].join("\n"), lang: document.documentElement.lang }
+      })
+      const hit = seen.text.match(english)
+      if (hit) fail(`English on a Filipino screen (${where}): "${hit[0]}"`)
+      if (seen.lang !== "fil") fail(`the page's language is ${seen.lang} on ${where}`)
+    }
+    /** what must stay as it is when the language changes: the screen, the answers, the slider and its knob */
+    const state = () =>
+      page.evaluate(() => {
+        const group = [...document.querySelectorAll('[role="radiogroup"]')].at(-1)
+        const knob = group.querySelector(".press")?.getBoundingClientRect()
+        const stages = document.querySelectorAll("main > [data-stage]")
+        const session = JSON.parse(localStorage.getItem("wrd-survey:session"))
+        return {
+          stages: stages.length,
+          mark: stages[0]?.dataset.mark ?? "",
+          sliderTop: Math.round(group.getBoundingClientRect().top),
+          knobLeft: knob ? Math.round(knob.left) : null,
+          checked: group.querySelector('[role="radio"][aria-checked="true"]')?.getAttribute("aria-label") ?? "",
+          heading: document.querySelector("main h1")?.textContent ?? "",
+          chip: document.querySelector("[data-chip]")?.textContent ?? "",
+          next: document.querySelector('[data-bar="right"]').textContent,
+          shown: document.querySelector("#root").innerText,
+          at: session.at,
+          answers: JSON.stringify(session.answers),
+        }
+      })
+    let partThree = 0
+    const afterPick = async ({ chip, value }) => {
+      if (chip !== "Bahagi III" || ++partThree !== 3) return
+      // the switch in the middle of a part: the words change where they are, nothing else does
+      // (once the knob has popped in: it is measured where it rests)
+      await page.waitForTimeout(400)
+      const before = problems.length
+      await page.evaluate(() => (document.querySelector("main > [data-stage]").dataset.mark = "same"))
+      const fil = await state()
+      await page.screenshot({ path: `${out}fil-50-switch-filipino.png` })
+      await switchTo(page, "English")
+      const en = await state()
+      await page.screenshot({ path: `${out}fil-51-switch-english.png` })
+      if (en.stages !== 1 || en.mark !== "same") fail("switching the language slid to a new screen")
+      if (en.at !== fil.at || en.answers !== fil.answers) fail("switching the language changed the place or the answers")
+      if (en.sliderTop !== fil.sliderTop || en.knobLeft !== fil.knobLeft || en.knobLeft === null) fail(`switching the language moved the slider: top ${fil.sliderTop} → ${en.sliderTop}, knob ${fil.knobLeft} → ${en.knobLeft}`)
+      if (!fil.checked.startsWith(`${value} `) || !en.checked.startsWith(`${value} `)) fail(`switching the language changed the answer: ${fil.checked} → ${en.checked}`)
+      if (en.chip !== "Part III" || en.next !== "Next" || !/\b3 OF 21\b/.test(en.shown) || en.heading === fil.heading) fail(`after switching to English the screen reads: ${en.chip} / ${en.heading} / ${en.next}`)
+      if (!/\b3 SA 21\b/.test(fil.shown)) fail("the Filipino count doesn't read 3 SA 21")
+      if (!/^\d (Always|Often|Sometimes|Rarely|Never)$/.test(en.checked)) fail(`the English slider says ${en.checked}`)
+      // a reload remembers the language, the place and the answer; so does going back to Filipino
+      await page.reload()
+      await settle(page)
+      const reloaded = await state()
+      if (reloaded.next !== "Next" || reloaded.at !== fil.at || reloaded.checked !== en.checked) fail("a reload after switching to English lost the language, the place or the answer")
+      await switchTo(page, "Filipino")
+      await page.reload()
+      await settle(page)
+      const back = await state()
+      if (back.next !== "Susunod" || back.chip !== "Bahagi III" || back.heading !== fil.heading || back.checked !== fil.checked || back.at !== fil.at) fail("back in Filipino and reloaded, the screen isn't the one it was")
+      if (back.sliderTop !== fil.sliderTop || back.knobLeft !== fil.knobLeft) fail("back in Filipino, the slider isn't where it was")
+      if (problems.length === before) console.log("  switched to English and back in the middle of Part III: same screen, answer and slider; remembered after a reload")
+    }
+    const { scrolled } = await walk(page, { pick, shots, lang: "fil", onScreen, afterPick })
+    if (partThree < 3) fail("the walk never switched the language in Part III")
+    if (scrolled.length) console.log("  screens that scroll at 360 × 640 in Filipino:", scrolled)
+    for (const [what, px] of scrolled) {
+      if (/^Bahagi|profile|age|data use|sign/.test(what)) fail(`${what} scrolls by ${px}px on a 360 × 640 phone in Filipino`)
+    }
+    const reviewText = await page.locator("main").last().textContent()
+    if (!reviewText.includes("Nasagot ninyo ang 54 sa 54 na aytem")) fail(`the Filipino review says: ${reviewText}`)
+    await page.locator('[data-bar="right"]').click()
+    await page.getByText("Salamat sa pagsagot sa talatanungan.").waitFor()
+    await settle(page)
+    await onScreen("the thank-you")
+    await page.screenshot({ path: `${out}fil-99-done.png` })
+    const book = await sheets()
+    const rows = records(book.responses)
+    const row = rows.find((r) => r.group === "Y2")
+    const consent = records(book.consents).find((c) => c.response_id === row?.response_id)
+    // exactly what an English run saves, and the language
+    const expect = {
+      P1_age: "",
+      P1_sex: "Male",
+      P1_year: "Second year",
+      P1_l1: "Other",
+      P1_l1_other: "Mandaya",
+      P1_home: "English",
+      P1_home_other: "",
+      P1_engfreq: "Never",
+      pilot_feedback: "",
+      language: "fil",
+    }
+    for (const [k, v] of Object.entries(expect)) if (row?.[k] !== v) fail(`Filipino run: responses.${k} is ${JSON.stringify(row?.[k])}, expected ${JSON.stringify(v)}`)
+    const likert = Object.keys(row ?? {}).filter((k) => /^P[2-5]_/.test(k))
+    if (likert.length !== 49 || likert.some((k) => ![1, 2, 3, 4, 5].includes(row[k]))) fail("Filipino run: not all 49 Likert answers were saved as 1–5")
+    if (Object.keys(row ?? {}).join() !== Object.keys(rows[0]).join()) fail("the Filipino row doesn't have the columns of an English row")
+    if (consent?.language !== "fil" || consent.name !== "Maria Santos" || consent.data_use_1 !== "Yes" || consent.data_use_2 !== "No" || consent.data_use_3 !== "Yes") fail(`Filipino run: consent row: ${JSON.stringify(consent)}`)
+    console.log(`  saved as an English run is: Part I in the form's English words, ${likert.length} Likert answers 1–5, language fil`)
+
+    // TAPOS goes back to the start, still in Filipino: the language outlives the questionnaire
+    await page.locator('[data-bar="right"]').click()
+    await settle(page)
+    if ((await page.locator('[data-bar="right"]').textContent()) !== "Magsimula") fail("the start after TAPOS doesn't read MAGSIMULA")
+    await onScreen("the start, after submitting")
+
+    // the exit dialog and the under-18 stop, in Filipino
+    await clickNext(page)
+    await page.getByRole("button", { name: "Lumabas" }).click()
+    await page.getByText("Aalis na ngayon?").waitFor()
+    await page.waitForTimeout(500)
+    await onScreen("the exit dialog")
+    await page.screenshot({ path: `${out}fil-97-exit-dialog.png` })
+    await page.getByRole("button", { name: "Magpatuloy" }).click()
+    await page.waitForTimeout(450)
+    await page.getByRole("radio", { name: "Hindi", exact: true }).click()
+    if ((await page.evaluate(() => JSON.parse(localStorage.getItem("wrd-survey:session")).age)) !== "No") fail("the Filipino HINDI isn't kept as the form's No")
+    await page.locator('[data-bar="right"]').click()
+    await page.getByText("Kailangan ninyo ang pahintulot ng inyong magulang o tagapag-alaga bago kayo sumagot.").waitFor()
+    await settle(page)
+    await onScreen("the under-18 stop")
+    await page.screenshot({ path: `${out}fil-98-under-18.png` })
+    if (records((await sheets()).consents).length !== records(book.consents).length) fail("the under-18 stop saved something (Filipino)")
+    console.log("  the thank-you, the start, the exit dialog and the under-18 stop: all in Filipino")
     await ctx.close()
   }
 
@@ -400,7 +567,7 @@ try {
     await page.getByText("Questionnaire responses").waitFor()
     const text = await page.locator("body").textContent()
     if (!/1 of 10\s*submitted/.test(text)) fail("pilot count is not 1 of 10")
-    if (!/1 of 16\s*submitted/.test(text)) fail("first-year count is not 1 of 16")
+    if ((text.match(/1 of 16\s*submitted/g) ?? []).length !== 2) fail("the first-year and second-year counts are not 1 of 16 each")
     if (!text.includes("Average")) fail("no pilot time")
     if (!text.includes("1 has signed the consent form but not submitted yet")) fail("the questionnaire left waiting isn't counted")
     await page.screenshot({ path: `${out}researchers.png`, fullPage: true })
@@ -408,8 +575,10 @@ try {
     const csv = readFileSync(await dl.path(), "utf8")
     const lines = csv.replace(/^﻿/, "").trim().split("\r\n")
     if (!csv.startsWith("﻿")) fail("the CSV has no byte-order mark")
-    if (lines.length !== 3) fail(`responses CSV has ${lines.length - 1} rows, expected 2`)
-    if (lines[0].split(",").length !== 63) fail(`responses CSV has ${lines[0].split(",").length} columns, expected 63`)
+    if (lines.length !== 4) fail(`responses CSV has ${lines.length - 1} rows, expected 3`)
+    if (lines[0].split(",").length !== 64) fail(`responses CSV has ${lines[0].split(",").length} columns, expected 64`)
+    if (!lines[0].endsWith(",language")) fail("the responses CSV doesn't end with the language column")
+    if (lines.slice(1).map((l) => l.split(",").at(-1)).sort().join() !== "en,en,fil") fail("the responses CSV doesn't say which language each was answered in")
     const [dl2] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Consents" }).click()])
     const consents = readFileSync(await dl2.path(), "utf8")
     if (!consents.includes("Maria Santos")) fail("the consents CSV is missing the pilot's consent")

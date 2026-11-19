@@ -1,3 +1,4 @@
+import { strings, type Lang, type Strings } from "./strings"
 import type { Answers, Group } from "./survey"
 
 /**
@@ -56,18 +57,26 @@ export const api = {
     signature: string
     address: string
     data_use: number[]
+    /** the language the consent form was signed in */
+    language: Lang
   }) => post<object>({ action: "consent", ...body }),
-  submit: (body: { id: string; group: Group | ""; answers: Answers; elapsed_ms: number }) =>
-    post<{ submitted_at: string }>({ action: "submit", ...body }),
+  submit: (body: {
+    id: string
+    group: Group | ""
+    answers: Answers
+    elapsed_ms: number
+    /** the language on screen at SUBMIT; one who switched part-way shows only as this */
+    language: Lang
+  }) => post<{ submitted_at: string }>({ action: "submit", ...body }),
   summary: (password: string) => post<Summary>({ action: "summary", password }),
 }
 
-/** what to tell a respondent when a call fails */
+/** what to tell a respondent when a call fails: which of the app's messages (strings.ts) */
+export function errorKind(error: ApiError): Extract<keyof Strings, "noNetwork" | "wentWrong"> {
+  return error === "network" ? "noNetwork" : "wentWrong"
+}
+
+/** the same in English, for the researchers' page */
 export function errorMessage(error: ApiError): string {
-  switch (error) {
-    case "network":
-      return "Can't reach the server. Check your connection and try again."
-    default:
-      return "Something went wrong. Please tell the researchers."
-  }
+  return strings.en[errorKind(error)]
 }

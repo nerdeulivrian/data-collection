@@ -34,6 +34,7 @@ const RESPONSE_COLUMNS = [
   "started_at",
   "submitted_at",
   "duration_min",
+  "language",
 ]
 const CONSENT_COLUMNS = [
   "response_id",
@@ -44,11 +45,12 @@ const CONSENT_COLUMNS = [
   "data_use_2",
   "data_use_3",
   "agreed_at",
+  "language",
 ]
 
 type App = ReturnType<typeof fresh>["app"]
 
-function consent(app: App, id: string) {
+function consent(app: App, id: string, language?: unknown) {
   return app.post({
     action: "consent",
     id,
@@ -56,6 +58,7 @@ function consent(app: App, id: string) {
     signature: "Juan Dela Cruz",
     address: "Obrero, Davao City",
     data_use: [1, 3],
+    language,
   })
 }
 
@@ -88,7 +91,7 @@ describe("setup", () => {
   it("updates a tab an earlier version made, keeping any rows", () => {
     const google = createGoogle({ password: "secret" })
     const old = google.book.insertSheet("consents")
-    old.getRange(1, 1, 1, 8).setValues([["access_code", ...CONSENT_COLUMNS.slice(1)]])
+    old.getRange(1, 1, 1, 8).setValues([["access_code", ...CONSENT_COLUMNS.slice(1, 8)]])
     const answered = google.book.insertSheet("responses")
     answered.getRange(1, 1, 2, 2).setValues([
       ["code", "group"],
@@ -100,6 +103,27 @@ describe("setup", () => {
     expect(header.slice(0, 3)).toEqual(["code", "group", "response_id"])
     expect(header).toHaveLength(RESPONSE_COLUMNS.length + 1)
     expect(google.book.tab("responses").rows[1].slice(0, 2)).toEqual(["P-01", "P"])
+  })
+
+  it("adds the language column at the end of tabs that already have rows, and keeps the rows", () => {
+    // the Sheet as it was before the questionnaire had two languages
+    const google = createGoogle({ password: "secret" })
+    const before = { consents: CONSENT_COLUMNS.slice(0, -1), responses: RESPONSE_COLUMNS.slice(0, -1) }
+    for (const [name, columns] of Object.entries(before)) {
+      const row = columns.map((c) => (c === "response_id" ? "T-AAAA2222" : c === "name" ? "Juan" : ""))
+      google.book.insertSheet(name).getRange(1, 1, 2, columns.length).setValues([columns, row])
+    }
+    const app = loadCode(source, google.globals)
+    app.setup()
+    expect(google.book.tab("consents").rows[0]).toEqual(CONSENT_COLUMNS)
+    expect(google.book.tab("responses").rows[0]).toEqual(RESPONSE_COLUMNS)
+    expect(google.book.tab("consents").records()[0]).toMatchObject({ response_id: "T-AAAA2222", name: "Juan" })
+    expect(google.book.tab("responses").records()).toHaveLength(1)
+    // and a questionnaire answered after that says its language
+    consent(app, "R-BBBB3333", "fil")
+    app.post({ action: "submit", id: "R-BBBB3333", group: "Y1", answers: { P2_01: 4 }, language: "fil" })
+    expect(google.book.tab("consents").records()[1]).toMatchObject({ response_id: "R-BBBB3333", language: "fil" })
+    expect(google.book.tab("responses").records()[1]).toMatchObject({ P2_01: 4, language: "fil" })
   })
 })
 
@@ -262,6 +286,26 @@ describe("submit", () => {
     const [row] = book.tab("responses").records()
     expect(row.pilot_feedback).toBe("=HYPERLINK(1)")
     expect(row.P1_l1_other).toBe("-Mandaya")
+  })
+
+  it("keeps the language the questionnaire was in, en or fil and nothing else", () => {
+    const { app, book } = fresh()
+    const send = (id: string, language: unknown) => {
+      consent(app, id, language)
+      app.post({ action: "submit", id, group: "Y1", answers, language })
+    }
+    send("R-AAAA2222", "en")
+    send("R-BBBB3333", "fil")
+    send("R-CCCC4444", "=1+1")
+    send("R-DDDD5555", undefined)
+    send("R-EEEE6666", "FIL")
+    expect(book.tab("responses").records().map((r) => r.language)).toEqual(["en", "fil", "", "", ""])
+    expect(book.tab("consents").records().map((r) => r.language)).toEqual(["en", "fil", "", "", ""])
+    // the answers are the same whichever language they were given in
+    const [english, filipino] = book.tab("responses").records()
+    for (const k of ["P1_sex", "P1_year", "P1_home", "P1_engfreq", "P2_01", "P5_10", "group"]) {
+      expect(filipino[k]).toEqual(english[k])
+    }
   })
 
   it("leaves the times blank when the app sent no usable duration", () => {

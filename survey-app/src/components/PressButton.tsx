@@ -29,7 +29,8 @@ const sizeClass = {
   wide: "w-full h-[50px] text-[15px] leading-[18px]",
   fill: "w-full h-full text-[15px] leading-[18px]",
   mdGrow: "min-w-[150px] px-6 h-[50px] text-[17px] leading-[20px]",
-  smGrow: "flex-1 px-3 h-[44px] text-[15px] leading-[18px]",
+  // px-2: on a 320px phone the Filipino OO, PUMAPAYAG AKO needs the room (two lines of it fit)
+  smGrow: "flex-1 px-2 h-[44px] text-[15px] leading-[18px]",
 }
 
 /**

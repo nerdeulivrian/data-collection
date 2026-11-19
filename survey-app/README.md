@@ -11,6 +11,9 @@ Every word of the questionnaire comes from the validated Google Form, by way of
 `src/questionnaire.json` (made by `scripts/form_to_questionnaire.py`; don't edit it by hand). The
 form's respondent code is the one thing left out.
 
+The questionnaire can be read in **English or Filipino**: a small **EN | FIL** switch sits beside
+the exit button on every screen. See [English and Filipino](#english-and-filipino).
+
 ## What a respondent sees
 
 1. **The start screen:** the title and who the study is for, and START.
@@ -35,6 +38,11 @@ form's respondent code is the one thing left out.
    reads REVIEW there and comes straight back.
 8. **The thank-you message.**
 
+The **EN | FIL** switch (top right, beside EXIT, and on the start and end screens too) changes
+every word on the screen at once: the consent form, the letter, the directions, the items, the
+scale labels, the buttons and the messages. It keeps the respondent's place and answers, and the
+phone remembers the choice. English is what a phone shows the first time.
+
 Progress is kept on the phone as the respondent goes, so a reload or a dropped connection loses
 nothing. EXIT (top right) after the consent form is a break: the start screen then says a
 questionnaire is waiting, with CONTINUE and START OVER (which deletes it from the phone, for the
@@ -55,13 +63,17 @@ It lives in one Google Sheet, in two tabs:
 
 | Tab | What | |
 |---|---|---|
-| `consents` | response_id, name, signature, address, data_use_1–3 (Yes/No, in the form's order), agreed_at | names: keep apart |
-| `responses` | one row per submission: `response_id`, `group`, `P1_age` … `P1_engfreq`, `P2_01` … `P5_10` (1–5 or blank), `pilot_feedback`, `started_at`, `submitted_at`, `duration_min` | 63 columns; `P1_age` stays empty, since the age is no longer asked |
+| `consents` | response_id, name, signature, address, data_use_1–3 (Yes/No, in the form's order), agreed_at, language | names: keep apart |
+| `responses` | one row per submission: `response_id`, `group`, `P1_age` … `P1_engfreq`, `P2_01` … `P5_10` (1–5 or blank), `pilot_feedback`, `started_at`, `submitted_at`, `duration_min`, `language` | 64 columns; `P1_age` stays empty, since the age is no longer asked |
 
 `response_id` is made on the phone for each questionnaire (like `R-K7Q2XM4P`). It ties a consent
 row to its answers, so a respondent who withdraws can be removed from both. The same questionnaire
 sent twice (a lost connection, a second tap) is kept once. `group` is blank if the year level was
 skipped. Times are Philippine time.
+
+`language` is `en` or `fil`: in `consents`, the language the consent form was signed in; in
+`responses`, the language on the screen at SUBMIT. A respondent who switched part-way shows only
+as the last one. It is blank in rows saved before the column existed.
 
 **Test runs:** open the site as `…/?test`. The start screen says it's a test, the ids start with
 `T-`, and the researchers' page leaves them out of the counts and both CSV files. They stay in the
@@ -69,6 +81,32 @@ Sheet, where they can be deleted. Never share the `?test` link with respondents.
 
 **After the study** (as the consent form promises, Data Privacy Act of 2012): download what you
 need, then delete the Google Sheet. In Apps Script, use Deploy → Manage deployments → Archive.
+
+## English and Filipino
+
+The answers are saved **the same way in either language**: 1 to 5 for the scales, and Part I in
+the form's English words (*Female*, *Second year*, *Other* …). Only what is shown changes, so
+rows answered in Filipino and in English go in the same columns and can be analysed together. The
+`language` column says which was used.
+
+- **English** is `src/questionnaire.json`, made from the Google Form. Never edit it by hand.
+- **Filipino** is `src/questionnaire.fil.json`, written by hand in the same shape. To change a
+  Filipino word, change it there. Keep the same items in the same order, the same number of
+  paragraphs in each text (a blank line between paragraphs), and the English examples inside the
+  items (“How do I say this?”, “Can you pass the takure?” …) in English. `pnpm test` checks all of
+  that, and that both languages have exactly the same screens.
+- The app's own words (buttons, "3 of 21", dialogs, messages) are in `src/strings.ts`, English
+  and Filipino side by side.
+- The study's title, the names, *BSEd Filipino*, *College of Education* and the Data Privacy Act
+  stay in English in both. The researchers' page is English only.
+- The consent form and the letter are cut into pages at the same places in both languages, so the
+  switch never moves a respondent to another screen.
+
+**The Filipino version is a translation, not yet a validated instrument.** It was checked by a
+blind back-translation and a separate language review, both done by AI, which is not a
+validation. Before a respondent reads it, have the research adviser or a Filipino-language
+teacher go over it. `pnpm review-sheet` writes `filipino-review.html`: the English and the Filipino
+side by side, row by row, with a column for remarks. It opens in a browser and prints.
 
 ## The researchers' page
 
@@ -98,10 +136,16 @@ account may not offer **Anyone** in step 5, and without it the app can't reach t
    **Anyone**. Then **Deploy**, and copy the **Web app URL** (it ends in `/exec`).
 6. To check it, open that URL in a browser. It should say `{"ok":true,"service":"questionnaire",…}`.
 
-If Code.gs changes later: paste the new file, save, run **setup** again (it brings the tabs up to
-date and deletes nothing), then **Deploy → Manage deployments** → pencil → *Version*: **New
-version** → **Deploy**. The URL stays the same. A `codes` tab left by the earlier, code-based
-version can be deleted.
+If Code.gs changes later: paste the new file, **put your password back** on the
+`RESEARCHER_PASSWORD` line (the file in this folder has none), save, run **setup** again (it brings
+the tabs up to date and deletes nothing), then **Deploy → Manage deployments** → pencil →
+*Version*: **New version** → **Deploy**. The URL stays the same. A `codes` tab left by the earlier,
+code-based version can be deleted.
+
+The `language` column came with the Filipino version (2026-11-19). A Sheet set up before that gets
+it by the steps above: **setup** adds `language` as the last column of both tabs and keeps every
+row. Until then nothing breaks: the questionnaire works in both languages, and the language is
+simply not recorded.
 
 ## Put it online
 
@@ -128,15 +172,19 @@ search engines not to list them.
 ```sh
 pnpm install
 pnpm dev       # http://localhost:5181 — runs the real Code.gs on a pretend Sheet; researchers' password: dev
-pnpm test      # Code.gs on the pretend Sheet, the flow, the CSV
+pnpm test      # Code.gs on the pretend Sheet, the flow, the CSV, and that English and Filipino match
 pnpm e2e       # the whole questionnaire in a browser: a pilot on a 360×640 phone, a first year on a laptop,
-               # a break and START OVER, a test run, a declined consent, the researchers' page and its CSVs
-               # (screenshots in e2e-out/)
+               # a second year in Filipino (switching in the middle and back), a break and START OVER,
+               # a test run, a declined consent, the researchers' page and its CSVs (screenshots in e2e-out/)
+pnpm review-sheet   # filipino-review.html: English and Filipino side by side, for the adviser
 ```
 
 - `server/Code.gs`: the backend (Apps Script). `server/googleFakes.ts` is the pretend Google
   behind the tests and `pnpm dev`.
 - `src/survey.ts`: the questionnaire and the order of the screens. `src/respondent/` holds the
   questionnaire's screens and `src/researchers/` the researchers' page.
+- `src/questionnaire.fil.json`, `src/strings.ts`, `src/app/language.tsx`: the Filipino words, the
+  app's own words in both languages, and the language picked (kept on the phone as
+  `wrd-survey:lang`).
 - `src/components`, `src/design`: from Tuwon's player (`tuwon-player`). These are the press buttons,
   the option cards, the progress bar, the dialogs, the tokens, Tuwon Sans and the step slide-over.

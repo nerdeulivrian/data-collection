@@ -1,4 +1,5 @@
 import clsx from "clsx"
+import { useStrings } from "@/app/language"
 import { DialogFrame } from "./DialogFrame"
 import { PressButton } from "./PressButton"
 import { optionStyle } from "./optionStyles"
@@ -64,6 +65,7 @@ export function BlanksDialog({
   onSubmit: () => void
   onStay: () => void
 }) {
+  const t = useStrings()
   const n = blanks.length
   const shown = n > MAX_TILES ? blanks.slice(0, MAX_TILES - 1) : blanks
   const more = n - shown.length
@@ -71,19 +73,16 @@ export function BlanksDialog({
     <DialogFrame labelledBy="blanks-title" onDismiss={onStay}>
       <div className="flex flex-col gap-1">
         <h2 id="blanks-title" className="text-[20px] font-extrabold text-ink-strong">
-          <span className="text-incorrect">
-            {n} {n === 1 ? "item" : "items"}
-          </span>{" "}
-          left blank
+          <span className="text-incorrect">{t.blankCount(n)}</span> {t.blankRest}
         </h2>
-        <p className="text-[16px] leading-snug font-semibold text-ink">Submit anyway?</p>
+        <p className="text-[16px] leading-snug font-semibold text-ink">{t.submitAnywayAsk}</p>
       </div>
-      <ul aria-label="Items left blank" className="flex flex-wrap justify-center gap-x-2 gap-y-3">
+      <ul aria-label={t.itemsLeftBlank} className="flex flex-wrap justify-center gap-x-2 gap-y-3">
         {shown.map((b) => (
           <li key={b.index}>
             <button
               type="button"
-              aria-label={`Go to item ${b.label}`}
+              aria-label={t.goToItem(b.label)}
               onClick={() => onGoTo(b.index)}
               className={clsx(
                 "press flex h-[44px] min-w-[44px] items-center justify-center rounded-[8px] border px-2 text-[15px] font-[700] text-incorrect [--press-depth:4px]",
@@ -102,10 +101,10 @@ export function BlanksDialog({
       </ul>
       <div className="flex w-full flex-col gap-4">
         <PressButton tone="brand" size="wide" autoFocus onClick={() => onGoTo(blanks[0].index)}>
-          Go back
+          {t.goBack}
         </PressButton>
         <PressButton tone="caution" size="wide" onClick={onSubmit}>
-          Submit anyway
+          {t.submitAnyway}
         </PressButton>
       </div>
     </DialogFrame>

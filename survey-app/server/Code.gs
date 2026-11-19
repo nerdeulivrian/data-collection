@@ -27,6 +27,11 @@ const GROUPS = ["P", "Y1", "Y2", "T"]
 
 const TIME_ZONE = "Asia/Manila"
 
+/**
+ * The questionnaire can be read in English or Filipino. The answers are saved the same way in
+ * either (1 to 5, and Part I in the form's English words); the last column of each tab, language,
+ * says which it was: en or fil. It is last so that setup can add it to tabs that already have rows.
+ */
 const CONSENT_COLUMNS = [
   "response_id",
   "name",
@@ -36,6 +41,7 @@ const CONSENT_COLUMNS = [
   "data_use_2",
   "data_use_3",
   "agreed_at",
+  "language",
 ]
 const PROFILE_TEXT = [
   "P1_sex",
@@ -57,6 +63,7 @@ const RESPONSE_COLUMNS = ["response_id", "group", "P1_age"].concat(PROFILE_TEXT,
   "started_at",
   "submitted_at",
   "duration_min",
+  "language",
 ])
 /** columns that hold numbers, so the Sheet can average them; every other column stays plain text */
 const NUMBER_COLUMNS = ["P1_age", "duration_min"].concat(LIKERT_COLUMNS)
@@ -127,6 +134,7 @@ function consent_(request) {
     data_use_2: use.indexOf(2) >= 0 ? "Yes" : "No",
     data_use_3: use.indexOf(3) >= 0 ? "Yes" : "No",
     agreed_at: stamp_(new Date()),
+    language: language_(request.language),
   }
   const consents = sheet_("consents")
   const earlier = find_(consents, "response_id", id)
@@ -139,7 +147,8 @@ function consent_(request) {
  * A finished questionnaire: one row in the responses tab. Only after a signed consent form, and
  * only once: the same questionnaire sent again (a lost reply, a second tap) keeps the first row.
  * The app sends how long the respondent took by its own clock (elapsed_ms), so a phone set to the
- * wrong time cannot skew the duration; started_at is worked back from it.
+ * wrong time cannot skew the duration; started_at is worked back from it. language is the one on
+ * screen at SUBMIT: a respondent who switched part-way shows only as the last one.
  */
 function submit_(request) {
   const id = id_(request.id)
@@ -163,6 +172,7 @@ function submit_(request) {
   record.started_at = timed ? stamp_(new Date(now.getTime() - elapsed)) : ""
   record.submitted_at = stamp_(now)
   record.duration_min = timed ? Math.round(elapsed / 6000) / 10 : ""
+  record.language = language_(request.language)
   append_(responses, record)
   return { ok: true, submitted_at: record.submitted_at }
 }
@@ -283,6 +293,11 @@ function text_(value, max) {
 
 function likert_(value) {
   return value === 1 || value === 2 || value === 3 || value === 4 || value === 5 ? value : ""
+}
+
+/** the language the questionnaire was read in: en (English) or fil (Filipino), or blank if the app didn't say */
+function language_(value) {
+  return value === "en" || value === "fil" ? value : ""
 }
 
 function age_(value) {
