@@ -201,6 +201,13 @@ researchers' page at `…/el3113-survey/researchers/`. The repository holds only
 this source. To publish a change, run the build again (it keeps `dist/.git`), then
 `git add -A && git commit -qm Update && git push` in `dist`.
 
+**Its own address.** The site answers at `https://survey.tuwon.app`. Two things make that work:
+`public/CNAME` names the address, so every build carries it (a push without that file would drop
+the address), and the domain's DNS has a CNAME record `survey` pointing to `<account>.github.io`
+(in Cloudflare, set to "DNS only", not proxied, so GitHub can issue the HTTPS certificate). The
+`github.io` address then sends people on to the new one. To use another address, change
+`public/CNAME` and the DNS record; to go back to `github.io`, delete both.
+
 There are no analytics, trackers or outside fonts, and no answers ever go in a URL. The pages ask
 search engines not to list them.
 
