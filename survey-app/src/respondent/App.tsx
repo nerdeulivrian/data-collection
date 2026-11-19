@@ -31,13 +31,13 @@ type Dialog = "exit" | "decline" | "blanks" | "restart" | null
 
 function chipFor(screen: Screen): string {
   switch (screen.kind) {
-    // the age check and the consent form have no name in the strip (Ian, 2026-11-19)
+    // only the parts and the pilot's question have a name in the strip (Ian, 2026-11-19)
     case "age":
     case "dataUse":
     case "sign":
-      return ""
     case "read":
-      return screen.section === "consent" ? "" : screen.section === "letter" ? "Letter" : "Directions"
+    case "review":
+      return ""
     case "partIntro":
       return `Part ${partName(q.parts[screen.part].title).roman}`
     case "profile":
@@ -46,8 +46,6 @@ function chipFor(screen: Screen): string {
       return `Part ${partName(likertParts[screen.part - 1].title).roman}`
     case "pilot":
       return "Pilot test"
-    case "review":
-      return "Submit"
   }
 }
 
