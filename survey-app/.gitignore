@@ -5,3 +5,4 @@ dist
 .env*.local
 e2e-out
 filipino-review.html
+preview-out

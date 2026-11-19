@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs"
-import { describe, expect, it } from "vitest"
-import { createGoogle, loadCode } from "./googleFakes.ts"
+import { describe, expect, it, vi } from "vitest"
+import { createGoogle, FakeSheet, loadCode } from "./googleFakes.ts"
 
 const source = readFileSync(new URL("./Code.gs", import.meta.url), "utf8")
 
@@ -8,17 +8,19 @@ function fresh(password: string | undefined = "secret") {
   const google = createGoogle({ password })
   const app = loadCode(source, google.globals)
   app.setup()
-  return { app, book: google.book }
+  return { app, book: google.book, logs: google.logs }
 }
 
 const likert = (part: string, n: number) =>
   Array.from({ length: n }, (_, i) => `${part}_${String(i + 1).padStart(2, "0")}`)
 
-/** the handover's columns, in its order, with the code replaced by the questionnaire's own id */
+/**
+ * the handover's columns, in its order, with the code replaced by the questionnaire's own id, and
+ * without the age, which is not asked (Ian, 2026-11-19)
+ */
 const RESPONSE_COLUMNS = [
   "response_id",
   "group",
-  "P1_age",
   "P1_sex",
   "P1_year",
   "P1_l1",
@@ -84,8 +86,16 @@ describe("setup", () => {
     const at = (name: string) => formats.get(RESPONSE_COLUMNS.indexOf(name) + 1)
     expect(at("response_id")).toBe("@")
     expect(at("started_at")).toBe("@")
+    expect(at("P1_sex")).toBe("@")
     expect(at("P3_01")).toBeUndefined()
-    expect(at("P1_age")).toBeUndefined()
+    expect(at("duration_min")).toBeUndefined()
+  })
+
+  it("has 63 columns of answers and 9 of consent, and no column for the age", () => {
+    const { book } = fresh()
+    expect(book.tab("responses").rows[0]).toHaveLength(63)
+    expect(book.tab("consents").rows[0]).toHaveLength(9)
+    expect(book.tab("responses").rows[0]).not.toContain("P1_age")
   })
 
   it("updates a tab an earlier version made, keeping any rows", () => {
@@ -124,6 +134,173 @@ describe("setup", () => {
     app.post({ action: "submit", id: "R-BBBB3333", group: "Y1", answers: { P2_01: 4 }, language: "fil" })
     expect(google.book.tab("consents").records()[1]).toMatchObject({ response_id: "R-BBBB3333", language: "fil" })
     expect(google.book.tab("responses").records()[1]).toMatchObject({ P2_01: 4, language: "fil" })
+  })
+})
+
+describe("the look of the tabs", () => {
+  const column = (sheet: FakeSheet, name: string) => sheet.rows[0].indexOf(name) + 1
+  /** everything about a tab's look that setup asks for, to compare two runs */
+  const lookOf = (sheet: FakeSheet) => ({
+    tab: sheet.tabColor,
+    frozen: [sheet.frozenRows, sheet.frozenColumns],
+    widths: [...sheet.columnWidths],
+    heights: [...sheet.rowHeights],
+    bandings: sheet.bandings.map((b) => [b.box, b.first, b.second]),
+    rules: sheet.rules,
+    protections: sheet.protections.map((p) => [p.box, p.description, p.warningOnly]),
+    cells: [1, 2, 3].map((row) => sheet.rows[0].map((_, i) => sheet.look(row, i + 1))),
+  })
+
+  it("says Ready, with nothing left undone", () => {
+    expect(fresh().logs).toEqual(["Ready."])
+    expect(fresh("").logs[0]).toMatch(/^Ready, but: Put a password/)
+  })
+
+  it("freezes the header and the columns that say whose row it is", () => {
+    const { book } = fresh()
+    expect([book.tab("responses").frozenRows, book.tab("responses").frozenColumns]).toEqual([1, 2])
+    expect([book.tab("consents").frozenRows, book.tab("consents").frozenColumns]).toEqual([1, 1])
+  })
+
+  it("gives each part of the questionnaire its own header colour", () => {
+    const { book } = fresh()
+    const sheet = book.tab("responses")
+    const tint = (name: string) => sheet.look(1, column(sheet, name)).background
+    const parts = ["P1_sex", "P2_01", "P3_01", "P4_01", "P5_01"].map(tint)
+    expect(new Set(parts).size).toBe(5)
+    // one colour through a part, and another where the next begins
+    expect(tint("P2_08")).toBe(tint("P2_01"))
+    expect(tint("P3_21")).toBe(tint("P3_01"))
+    expect(tint("P1_engfreq")).toBe(tint("P1_sex"))
+    expect(tint("pilot_feedback")).not.toBe(tint("P5_10"))
+    expect(sheet.look(1, column(sheet, "P3_07"))).toMatchObject({ fontWeight: "bold", valign: "middle" })
+    // the columns that hold names stand out in the consents tab
+    const consents = book.tab("consents")
+    const names = ["name", "signature", "address"].map((n) => consents.look(1, column(consents, n)).background)
+    expect(new Set(names).size).toBe(1)
+    expect(names[0]).not.toBe(consents.look(1, column(consents, "response_id")).background)
+    expect([consents.tabColor, sheet.tabColor]).toEqual(["#ff4b4b", "#ff9600"])
+  })
+
+  it("makes the answer columns narrow and centred, and the pilot's remarks wide and wrapped", () => {
+    const { book } = fresh()
+    const sheet = book.tab("responses")
+    const answers = sheet.rows[0].filter((h) => /^P[2-5]_\d\d$/.test(String(h)))
+    expect(answers).toHaveLength(49)
+    for (const name of answers) {
+      expect(sheet.columnWidths.get(column(sheet, String(name)))).toBe(54)
+      expect(sheet.look(500, column(sheet, String(name)))).toMatchObject({ align: "center", wrap: "CLIP" })
+    }
+    expect(sheet.columnWidths.get(column(sheet, "pilot_feedback"))).toBe(360)
+    expect(sheet.look(500, column(sheet, "pilot_feedback"))).toMatchObject({ align: "left", wrap: "WRAP", valign: "top" })
+    // every column has a width, in both tabs
+    for (const tab of [sheet, book.tab("consents")]) {
+      expect([...tab.columnWidths.keys()].sort((a, b) => a - b)).toEqual(tab.rows[0].map((_, i) => i + 1))
+    }
+  })
+
+  it("shades every other row, down to the last row of the tab", () => {
+    const { book } = fresh()
+    const sheet = book.tab("responses")
+    expect(sheet.bandings).toHaveLength(1)
+    expect(sheet.bandings[0].box).toEqual({ row: 2, column: 1, numRows: sheet.getMaxRows() - 1, numColumns: 63 })
+    const shade = (row: number) => sheet.look(row, column(sheet, "P1_sex")).background
+    expect(shade(2)).toBe(shade(4))
+    expect(shade(3)).toBe(shade(999))
+    expect(shade(2)).not.toBe(shade(3))
+  })
+
+  it("marks an answer left blank in a submitted row, and nothing in an empty row", () => {
+    const { app, book } = fresh()
+    consent(app, "R-AAAA2222")
+    app.post({ action: "submit", id: "R-AAAA2222", group: "Y1", answers: { P2_01: 4, P5_10: 2 } })
+    const sheet = book.tab("responses")
+    const at = (row: number, name: string) => sheet.look(row, column(sheet, name)).background
+    // the first and the last answer column are given: the rule reaches both ends, and no further
+    expect(at(2, "P2_02")).toBe("#ffe9a8")
+    expect(at(2, "P5_09")).toBe("#ffe9a8")
+    expect(at(2, "P2_01")).not.toBe("#ffe9a8")
+    expect(at(2, "P5_10")).not.toBe("#ffe9a8")
+    expect(at(2, "P1_l1_other")).not.toBe("#ffe9a8")
+    expect(at(2, "pilot_feedback")).not.toBe("#ffe9a8")
+    expect(at(3, "P2_02")).not.toBe("#ffe9a8")
+  })
+
+  it("shows a test run in gray italics, in both tabs, and a real one as it is", () => {
+    const { app, book } = fresh()
+    for (const id of ["T-AAAA2222", "R-BBBB3333"]) {
+      consent(app, id)
+      app.post({ action: "submit", id, group: "Y1", answers: { P2_01: 4 } })
+    }
+    for (const tab of [book.tab("consents"), book.tab("responses")]) {
+      const last = tab.rows[0].length
+      expect(tab.look(2, 1)).toMatchObject({ fontColor: "#afafaf", italic: true })
+      expect(tab.look(2, last)).toMatchObject({ fontColor: "#afafaf", italic: true })
+      expect(tab.look(3, 1).italic).toBeUndefined()
+      expect(tab.look(3, last).fontColor).toBeUndefined()
+    }
+  })
+
+  it("puts a warning, not a lock, on the header row", () => {
+    const { book } = fresh()
+    for (const tab of [book.tab("consents"), book.tab("responses")]) {
+      expect(tab.protections).toHaveLength(1)
+      expect(tab.protections[0]).toMatchObject({ warningOnly: true, box: { row: 1, numRows: 1, column: 1 } })
+      expect(tab.protections[0].description).toMatch(/column names/)
+    }
+  })
+
+  it("gives the same look when setup runs again, and to rows added in between", () => {
+    const { app, book, logs } = fresh()
+    const before = { consents: lookOf(book.tab("consents")), responses: lookOf(book.tab("responses")) }
+    consent(app, "R-AAAA2222")
+    app.post({ action: "submit", id: "R-AAAA2222", group: "Y1", answers: { P2_01: 4 } })
+    const grids = app.post({ action: "summary", password: "secret" })
+    app.setup()
+    app.setup()
+    expect(logs).toEqual(["Ready.", "Ready.", "Ready."])
+    for (const name of ["consents", "responses"] as const) {
+      const now = lookOf(book.tab(name))
+      // the cells of rows 2 and 3 look different once a row is answered (its blank answers are marked)
+      expect({ ...now, cells: 0 }).toEqual({ ...before[name], cells: 0 })
+    }
+    // and the look changes no value: the page and the CSV files get what they got before
+    const after = app.post({ action: "summary", password: "secret" })
+    expect([after.responses, after.consents]).toEqual([grids.responses, grids.consents])
+    expect(book.tab("responses").rows[0]).toEqual(RESPONSE_COLUMNS)
+    expect(book.tab("consents").rows[0]).toEqual(CONSENT_COLUMNS)
+  })
+
+  it("styles a tab an earlier version made, whatever order its columns are in", () => {
+    const google = createGoogle({ password: "secret" })
+    google.book.insertSheet("responses").getRange(1, 1, 2, 3).setValues([
+      ["code", "P2_01", "response_id"],
+      ["P-01", "", "R-AAAA2222"],
+    ])
+    loadCode(source, google.globals).setup()
+    expect(google.logs).toEqual(["Ready."])
+    const sheet = google.book.tab("responses")
+    // no column that says whose row it is comes first, so none is frozen
+    expect(sheet.frozenColumns).toBe(0)
+    // the rules find response_id where it is (column C), and the answer columns where they are
+    expect(sheet.look(2, 2).background).toBe("#ffe9a8")
+    expect(sheet.look(2, column(sheet, "P5_10")).background).toBe("#ffe9a8")
+    expect(sheet.look(2, 1).background).not.toBe("#ffe9a8")
+  })
+
+  it("has the tabs ready for answers even if a colour fails", () => {
+    const broken = vi.spyOn(FakeSheet.prototype, "setTabColor").mockImplementation(() => {
+      throw new Error("no colours today")
+    })
+    try {
+      const { app, book, logs } = fresh()
+      expect(logs[0]).toMatch(/^Ready, but: The two tabs are ready and can be used\..*no colours today$/)
+      expect(book.tab("responses").rows[0]).toEqual(RESPONSE_COLUMNS)
+      expect(consent(app, "R-AAAA2222")).toEqual({ ok: true })
+      expect(app.post({ action: "submit", id: "R-AAAA2222", answers: { P2_01: 4 } })).toMatchObject({ ok: true })
+    } finally {
+      broken.mockRestore()
+    }
   })
 })
 
@@ -193,7 +370,6 @@ describe("consent", () => {
 
 describe("submit", () => {
   const answers = {
-    P1_age: "19",
     P1_sex: "Female",
     P1_year: "First year",
     P1_l1: "Bisaya/Cebuano",
@@ -217,7 +393,6 @@ describe("submit", () => {
     expect(row).toMatchObject({
       response_id: "R-K7Q2XM4P",
       group: "Y1",
-      P1_age: 19,
       P1_sex: "Female",
       P1_year: "First year",
       P1_home: "Other",
@@ -232,6 +407,16 @@ describe("submit", () => {
     })
     expect(String(row.started_at)).toMatch(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/)
     expect(row.submitted_at).toBe(r.submitted_at)
+  })
+
+  it("keeps no age, even from a phone that still sends one", () => {
+    const { app, book } = fresh()
+    consent(app, "R-K7Q2XM4P")
+    app.post({ action: "submit", id: "R-K7Q2XM4P", group: "Y1", answers: { ...answers, P1_age: "19" } })
+    const [row] = book.tab("responses").records()
+    expect(Object.keys(row)).toEqual(RESPONSE_COLUMNS)
+    expect(Object.values(row)).not.toContain(19)
+    expect(Object.values(row)).not.toContain("19")
   })
 
   it("keeps the first row when the same questionnaire is sent again", () => {
@@ -279,13 +464,14 @@ describe("submit", () => {
     app.post({
       action: "submit",
       id: "R-AAAA2222",
-      answers: { pilot_feedback: "=HYPERLINK(1)", P1_l1_other: "-Mandaya", P1_age: "+19" },
+      answers: { pilot_feedback: "=HYPERLINK(1)", P1_l1_other: "-Mandaya", P1_home_other: "+Tagakaulo" },
     })
     app.post({ action: "consent", id: "R-BBBB3333", name: "=1+1", signature: "@me" })
     expect(book.formulas).toEqual([])
     const [row] = book.tab("responses").records()
     expect(row.pilot_feedback).toBe("=HYPERLINK(1)")
     expect(row.P1_l1_other).toBe("-Mandaya")
+    expect(row.P1_home_other).toBe("+Tagakaulo")
   })
 
   it("keeps the language the questionnaire was in, en or fil and nothing else", () => {

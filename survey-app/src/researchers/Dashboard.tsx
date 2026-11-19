@@ -7,11 +7,15 @@ import { PressButton } from "@/components/PressButton"
 import { ProgressBar } from "@/components/ProgressBar"
 import { download, durations, isTest, records, toCsv, withoutTests } from "@/csv"
 
-/** the groups, from the year level each respondent picks, and how many each should have (HANDOVER.md) */
+/**
+ * the groups, from the year level each respondent picks, and how many each should have: 25 each
+ * (Ian, 2026-11-19), where HANDOVER.md had 10, 16 and 16. For the first and second years the 25
+ * leaves headroom over the 16 the study needs from each
+ */
 const GROUPS = [
-  { id: "P", name: "Pilot", who: "Third year", target: 10 },
-  { id: "Y1", name: "First year", who: "", target: 16 },
-  { id: "Y2", name: "Second year", who: "", target: 16 },
+  { id: "P", name: "Pilot", who: "Third year", target: 25 },
+  { id: "Y1", name: "First year", who: "", target: 25 },
+  { id: "Y2", name: "Second year", who: "", target: 25 },
 ] as const
 
 /** remembered for this browser tab only, so a reload doesn't ask again */

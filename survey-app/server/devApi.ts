@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import type { Plugin } from "vite"
 import { createGoogle, loadCode } from "./googleFakes.ts"
+import { sheetPreview } from "./sheetPreview.ts"
 
 /** about how long Apps Script takes to answer, so loading states show in development too */
 const LATENCY_MS = 350
@@ -9,7 +10,8 @@ const LATENCY_MS = 350
 /**
  * In `pnpm dev`, the app talks to /dev-api, which runs the real Code.gs on a pretend Google Sheet
  * kept in memory (researchers' password: "dev"). GET /dev-api/sheets shows that Sheet and
- * POST /dev-api/reset starts it over; the end-to-end test uses both.
+ * POST /dev-api/reset starts it over; the end-to-end test uses both. GET /dev-api/sheet-preview is
+ * a page for people: how setup makes the tabs look, with made-up rows (server/sheetPreview.ts).
  */
 export function devApi(): Plugin {
   return {
@@ -28,6 +30,11 @@ export function devApi(): Plugin {
         const send = (body: unknown) => {
           res.setHeader("content-type", "application/json")
           res.end(JSON.stringify(body))
+        }
+        if (req.method === "GET" && req.url?.startsWith("/sheet-preview")) {
+          res.setHeader("content-type", "text/html; charset=utf-8")
+          res.end(sheetPreview(source()))
+          return
         }
         if (req.method === "GET" && req.url?.startsWith("/sheets")) {
           send(backend.google.book.dump())

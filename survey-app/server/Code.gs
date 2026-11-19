@@ -58,7 +58,8 @@ const LIKERT_COLUMNS = likertColumns_([
   ["P4", 10],
   ["P5", 10],
 ])
-const RESPONSE_COLUMNS = ["response_id", "group", "P1_age"].concat(PROFILE_TEXT, LIKERT_COLUMNS, [
+/** The age is not asked (Ian, 2026-11-19), so there is no P1_age column: Part I starts at the sex. */
+const RESPONSE_COLUMNS = ["response_id", "group"].concat(PROFILE_TEXT, LIKERT_COLUMNS, [
   "pilot_feedback",
   "started_at",
   "submitted_at",
@@ -66,7 +67,7 @@ const RESPONSE_COLUMNS = ["response_id", "group", "P1_age"].concat(PROFILE_TEXT,
   "language",
 ])
 /** columns that hold numbers, so the Sheet can average them; every other column stays plain text */
-const NUMBER_COLUMNS = ["P1_age", "duration_min"].concat(LIKERT_COLUMNS)
+const NUMBER_COLUMNS = ["duration_min"].concat(LIKERT_COLUMNS)
 
 /* ---------- the web app ---------- */
 
@@ -100,19 +101,31 @@ function doPost(e) {
 }
 
 /**
- * Run once from the editor (pick setup beside Debug, then Run): makes the two tabs. Running it
- * again is safe: it never deletes anything. A tab made by an earlier version of this file gets
- * this version's columns.
+ * Run once from the editor (pick setup beside Debug, then Run): makes the two tabs and gives them
+ * their look. Running it again is safe: it never deletes anything, and gives the same look. A tab
+ * made by an earlier version of this file gets this version's columns.
+ *
+ * The tabs come first and the look second, so a problem with a colour can never stop the tabs
+ * from being ready for answers: the log then says what stopped.
  */
 function setup() {
   const book = SpreadsheetApp.getActiveSpreadsheet()
-  tab_(book, "consents", CONSENT_COLUMNS)
-  tab_(book, "responses", RESPONSE_COLUMNS)
-  Logger.log(
-    password_()
-      ? "Ready."
-      : "Ready, but put a password in RESEARCHER_PASSWORD at the top of this file before you deploy.",
-  )
+  const consents = tab_(book, "consents", CONSENT_COLUMNS)
+  const responses = tab_(book, "responses", RESPONSE_COLUMNS)
+  const notes = []
+  try {
+    style_(consents, TAB_COLOURS.consents)
+    style_(responses, TAB_COLOURS.responses)
+  } catch (err) {
+    notes.push(
+      "The two tabs are ready and can be used. Only their colours and widths are not finished: " +
+        String((err && err.message) || err),
+    )
+  }
+  if (!password_()) {
+    notes.push("Put a password in RESEARCHER_PASSWORD at the top of this file before you deploy.")
+  }
+  Logger.log(notes.length ? "Ready, but: " + notes.join(" ") : "Ready.")
 }
 
 /* ---------- the actions ---------- */
@@ -161,7 +174,7 @@ function submit_(request) {
   const now = new Date()
   const elapsed = Number(request.elapsed_ms)
   const timed = isFinite(elapsed) && elapsed > 0 && elapsed < 7 * 24 * 3600 * 1000
-  const record = { response_id: id, group: group_(id, request.group), P1_age: age_(answers.P1_age) }
+  const record = { response_id: id, group: group_(id, request.group) }
   PROFILE_TEXT.forEach((k) => {
     record[k] = text_(answers[k], 200)
   })
@@ -217,6 +230,181 @@ function tab_(book, name, columns) {
     }
   })
   return sheet
+}
+
+/* ---------- how the tabs look ---------- */
+
+/**
+ * The look of the two tabs (Ian, 2026-11-19: "formatted and styled properly"). Nothing here
+ * changes what a cell holds or shows, because the CSV files are made of what shows (grid_): so
+ * no number or date formats, no checkboxes, no merged cells and no second header row. Only
+ * colours, widths, alignment, frozen panes and a warning on the header.
+ *
+ *   the header     one colour per part of the questionnaire, so the 49 answer columns can be told
+ *                  apart; in consents, red over the columns that hold names
+ *   frozen         the header row, and the columns that say whose row it is (response_id, group)
+ *   the rows       every other row lightly shaded, to read across
+ *   amber          an answer left blank in a submitted row
+ *   gray italics   a test run (its id starts with T-)
+ */
+const TAB_COLOURS = { consents: "#ff4b4b", responses: "#ff9600" }
+const HEADER_INK = "#3c3c3c"
+const TINTS = {
+  plain: "#e5e5e5",
+  names: "#ffd7d8",
+  profile: "#ffebcf",
+  P2: "#d6ecff",
+  P3: "#e4ffcf",
+  P4: "#ece1ff",
+  P5: "#ffd9ec",
+  feedback: "#fff3bf",
+}
+const ROW_SHADES = ["#ffffff", "#f7f7f7"]
+const BLANK_ANSWER = "#ffe9a8"
+const TEST_INK = "#afafaf"
+/** what Google shows when someone starts to change the header row */
+const HEADER_NOTE =
+  "The column names. The questionnaire finds each column by its name, so a changed name loses that column's answers."
+
+/** a column's look, from its name: its header's colour, its width in pixels, and how its cells sit */
+function look_(name) {
+  const part = /^P([2-5])_\d\d$/.exec(name)
+  if (part) return { tint: TINTS["P" + part[1]], width: 54, centre: true }
+  switch (name) {
+    case "response_id":
+      return { tint: TINTS.plain, width: 120, id: true }
+    case "group":
+      return { tint: TINTS.plain, width: 64, centre: true, id: true }
+    case "name":
+    case "signature":
+      return { tint: TINTS.names, width: 200 }
+    case "address":
+      return { tint: TINTS.names, width: 260 }
+    case "data_use_1":
+    case "data_use_2":
+    case "data_use_3":
+      return { tint: TINTS.profile, width: 96, centre: true }
+    case "P1_year":
+      return { tint: TINTS.profile, width: 200 }
+    case "pilot_feedback":
+      return { tint: TINTS.feedback, width: 360, wrap: true }
+    case "started_at":
+    case "submitted_at":
+    case "agreed_at":
+      return { tint: TINTS.plain, width: 150 }
+    case "duration_min":
+      return { tint: TINTS.plain, width: 110, centre: true }
+    case "language":
+      return { tint: TINTS.plain, width: 84, centre: true }
+  }
+  // the rest of Part I, and any column an earlier version of this file left
+  return { tint: /^P1_/.test(name) ? TINTS.profile : TINTS.plain, width: 130 }
+}
+
+function style_(sheet, tabColour) {
+  const header = header_(sheet)
+  const width = header.length
+  if (!width) return
+  const height = sheet.getMaxRows()
+  const looks = header.map(look_)
+  const top = sheet.getRange(1, 1, 1, width)
+
+  sheet.setTabColor(tabColour)
+  sheet.setFrozenRows(1)
+  // the columns that say whose row it is stay in view while the others scroll by
+  let frozen = 0
+  while (frozen < width && looks[frozen].id) frozen++
+  sheet.setFrozenColumns(frozen)
+
+  // every cell: at the top of its row, and a long text cut at its cell's edge
+  sheet
+    .getRange(1, 1, height, width)
+    .setVerticalAlignment("top")
+    .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP)
+  // widths and centring, a run of like columns at a time
+  runs_(looks.map((l) => [l.width, !!l.centre, !!l.wrap].join())).forEach((run) => {
+    const look = looks[run.start]
+    sheet.setColumnWidths(run.start + 1, run.length, look.width)
+    const cells = sheet.getRange(1, run.start + 1, height, run.length)
+    cells.setHorizontalAlignment(look.centre ? "center" : "left")
+    if (look.wrap) cells.setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP)
+  })
+
+  // the header
+  sheet.setRowHeight(1, 34)
+  top
+    .setBackgrounds([looks.map((l) => l.tint)])
+    .setFontColor(HEADER_INK)
+    .setFontWeight("bold")
+    .setVerticalAlignment("middle")
+    .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP)
+
+  // the rows under it, shaded in turn. An earlier run's shading goes first: Sheets refuses two
+  sheet.getBandings().forEach((b) => b.remove())
+  const rules = []
+  if (height > 1) {
+    sheet
+      .getRange(2, 1, height - 1, width)
+      .applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, false, false)
+      .setFirstRowColor(ROW_SHADES[0])
+      .setSecondRowColor(ROW_SHADES[1])
+
+    // what depends on a row's own cells. The formulas are written for row 2 and Sheets moves them
+    // along: $A2 stays in column A, K2 goes with the cell
+    const id = header.indexOf("response_id")
+    if (id >= 0) {
+      const whose = "$" + letters_(id + 1) + "2"
+      const answers = runs_(header.map((h) => (LIKERT_COLUMNS.indexOf(h) >= 0 ? "answer" : ""))).filter(
+        (run) => run.key === "answer",
+      )
+      if (answers.length) {
+        rules.push(
+          SpreadsheetApp.newConditionalFormatRule()
+            .whenFormulaSatisfied("=AND(" + whose + '<>"",ISBLANK(' + letters_(answers[0].start + 1) + "2))")
+            .setBackground(BLANK_ANSWER)
+            .setRanges(answers.map((run) => sheet.getRange(2, run.start + 1, height - 1, run.length)))
+            .build(),
+        )
+      }
+      rules.push(
+        SpreadsheetApp.newConditionalFormatRule()
+          .whenFormulaSatisfied("=LEFT(" + whose + ',2)="T-"')
+          .setFontColor(TEST_INK)
+          .setItalic(true)
+          .setRanges([sheet.getRange(2, 1, height - 1, width)])
+          .build(),
+      )
+    }
+  }
+  // the whole list at once, so a second run replaces the rules instead of adding to them
+  sheet.setConditionalFormatRules(rules)
+
+  // a warning (not a lock) on the header row, since a changed name loses that column's answers
+  sheet.getProtections(SpreadsheetApp.ProtectionType.RANGE).forEach((p) => {
+    if (p.getDescription() === HEADER_NOTE) p.remove()
+  })
+  sheet.getRange(1, 1, 1, sheet.getMaxColumns()).protect().setDescription(HEADER_NOTE).setWarningOnly(true)
+}
+
+/** the runs of equal neighbours in a list: [{ key, start (from 0), length }] */
+function runs_(keys) {
+  const out = []
+  keys.forEach((key, i) => {
+    const last = out[out.length - 1]
+    if (last && last.key === key) last.length++
+    else out.push({ key: key, start: i, length: 1 })
+  })
+  return out
+}
+
+/** a column's letters, from its number: 1 is A, 27 is AA */
+function letters_(n) {
+  let out = ""
+  while (n > 0) {
+    out = String.fromCharCode(65 + ((n - 1) % 26)) + out
+    n = Math.floor((n - 1) / 26)
+  }
+  return out
 }
 
 function sheet_(name) {
@@ -298,11 +486,6 @@ function likert_(value) {
 /** the language the questionnaire was read in: en (English) or fil (Filipino), or blank if the app didn't say */
 function language_(value) {
   return value === "en" || value === "fil" ? value : ""
-}
-
-function age_(value) {
-  const t = text_(value, 20)
-  return /^\d{1,3}$/.test(t) ? Number(t) : t
 }
 
 /** the questionnaire's own id, made on the phone: R- and 6 to 12 letters or digits (T- for a test) */

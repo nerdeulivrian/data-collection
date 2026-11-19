@@ -235,7 +235,6 @@ try {
     if (consent?.response_id !== row?.response_id) fail("the consent and the answers don't share a response_id")
     const expect = {
       group: "P",
-      P1_age: "",
       P1_sex: "Female",
       P1_year: "Third year (pilot test only)",
       P1_l1: "Other",
@@ -423,7 +422,6 @@ try {
     const consent = records(book.consents).find((c) => c.response_id === row?.response_id)
     // exactly what an English run saves, and the language
     const expect = {
-      P1_age: "",
       P1_sex: "Male",
       P1_year: "Second year",
       P1_l1: "Other",
@@ -566,8 +564,7 @@ try {
     await page.getByRole("button", { name: "Open" }).click()
     await page.getByText("Questionnaire responses").waitFor()
     const text = await page.locator("body").textContent()
-    if (!/1 of 10\s*submitted/.test(text)) fail("pilot count is not 1 of 10")
-    if ((text.match(/1 of 16\s*submitted/g) ?? []).length !== 2) fail("the first-year and second-year counts are not 1 of 16 each")
+    if ((text.match(/1 of 25\s*submitted/g) ?? []).length !== 3) fail("the pilot, first-year and second-year counts are not 1 of 25 each")
     if (!text.includes("Average")) fail("no pilot time")
     if (!text.includes("1 has signed the consent form but not submitted yet")) fail("the questionnaire left waiting isn't counted")
     await page.screenshot({ path: `${out}researchers.png`, fullPage: true })
@@ -576,7 +573,7 @@ try {
     const lines = csv.replace(/^﻿/, "").trim().split("\r\n")
     if (!csv.startsWith("﻿")) fail("the CSV has no byte-order mark")
     if (lines.length !== 4) fail(`responses CSV has ${lines.length - 1} rows, expected 3`)
-    if (lines[0].split(",").length !== 64) fail(`responses CSV has ${lines[0].split(",").length} columns, expected 64`)
+    if (lines[0].split(",").length !== 63) fail(`responses CSV has ${lines[0].split(",").length} columns, expected 63`)
     if (!lines[0].endsWith(",language")) fail("the responses CSV doesn't end with the language column")
     if (lines.slice(1).map((l) => l.split(",").at(-1)).sort().join() !== "en,en,fil") fail("the responses CSV doesn't say which language each was answered in")
     const [dl2] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Consents" }).click()])

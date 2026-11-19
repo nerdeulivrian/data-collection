@@ -63,7 +63,7 @@ export const texts: Record<Lang, Questionnaire> = { en: q, fil: rawFil as unknow
 
 /**
  * Part I as the respondents get it: the form's items without the age (Ian, 2026-11-19: not asked),
- * numbered again from 1. The Sheet keeps its `P1_age` column, which stays empty.
+ * numbered again from 1. The Sheet has no column for it.
  */
 const asked = (part: ProfilePart): ProfilePart => ({
   ...part,
@@ -99,7 +99,7 @@ export function partName(title: string) {
   return m ? { roman: m[1], name: m[2] } : { roman: "", name: title }
 }
 
-/** the answers so far, by column (P1_age, P3_07, pilot_feedback …) */
+/** the answers so far, by column (P1_sex, P3_07, pilot_feedback …) */
 export type Answers = Record<string, string | number>
 
 export type ReadSection = "consent" | "letter" | "directions"

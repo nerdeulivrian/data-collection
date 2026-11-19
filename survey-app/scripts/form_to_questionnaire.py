@@ -7,8 +7,9 @@ JSON, then run:
 
 Every piece of text comes from the form as it is: nothing is retyped. The only edits are two
 sentences that point at the Google Form's own Submit button, which this app doesn't have (noted
-below where they are dropped). Each item is checked against its expected title, so a change in the
-form stops the script instead of shifting items silently.
+below where they are dropped), and the number of pilot respondents, 25 where the form said 10
+(noted below too). Each item is checked against its expected title, so a change in the form stops
+the script instead of shifting items silently.
 """
 
 import json
@@ -68,6 +69,13 @@ def main(src: str, dst: str) -> None:
     for offset, title in enumerate(section_titles):
         it = item(4 + offset, title, TEXT)
         sections.append({"title": it[1], "body": desc(it)})
+    # changed: the pilot test has 25 respondents, not the 10 the form was validated with (Ian,
+    # 2026-11-19). Once the form says 25 itself, this changes nothing
+    selection = sections[section_titles.index("Selection of Participants")]
+    form_says, app_says = "invite 10 third-year", "invite 25 third-year"
+    if form_says not in selection["body"] and app_says not in selection["body"]:
+        raise SystemExit(f"expected the number of pilot respondents in {selection['body']!r}")
+    selection["body"] = selection["body"].replace(form_says, app_says)
     data_use = item(14, "Please tick the appropriate box:", CHECKBOX)
     name = item(15, "Participant", SHORT)
     signature = item(16, "Signature", SHORT)
