@@ -48,7 +48,9 @@ phone remembers the choice. English is what a phone shows the first time.
 Progress is kept on the phone as the respondent goes, so a reload or a dropped connection loses
 nothing. EXIT (top right) after the consent form is a break: the start screen then says a
 questionnaire is waiting, with CONTINUE and START OVER (which deletes it from the phone, for the
-next person). The name, signature and address leave the phone as soon as the consent form is sent.
+next person). On the start and end screens there is nothing to exit, so EXIT stays in its place
+but is gray and does not press. The name, signature and address leave the phone as soon as the
+consent form is sent.
 Everything is deleted from the phone once the answers are submitted.
 
 With no codes, anyone with the link can answer, and more than once: share the link only with the

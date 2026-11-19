@@ -24,7 +24,7 @@ export function Overline({ children, className }: { children: ReactNode; classNa
 
 /**
  * Tuwon's small square buttons (the phone's strip): 23px on a phone with a 45px tap target, 36px
- * from a tablet up.
+ * from a tablet up. Disabled, it stays where it is with a gray icon and does not press.
  */
 export function TinyButton({
   icon: Icon,
@@ -32,18 +32,21 @@ export function TinyButton({
   onClick,
   big = false,
   tone = "default",
+  disabled = false,
 }: {
   icon: LucideIcon
   label: string
   onClick: () => void
   big?: boolean
   tone?: "default" | "exit"
+  disabled?: boolean
 }) {
   return (
     <button
       type="button"
       aria-label={label}
       title={label}
+      disabled={disabled}
       onClick={onClick}
       className={clsx(
         "press relative flex items-center justify-center border border-line bg-white enabled:hover:bg-surface before:absolute before:content-['']",
@@ -52,7 +55,13 @@ export function TinyButton({
           : "rounded-sm p-[3px] before:-inset-[11px] [--press-depth:2px]",
       )}
     >
-      <Icon size={big ? 20 : 15} className={tone === "exit" ? "text-exit" : "text-ink-button"} />
+      <Icon
+        size={big ? 20 : 15}
+        className={clsx(
+          "transition-colors duration-300",
+          tone === "exit" && !disabled ? "text-exit" : "text-ink-button",
+        )}
+      />
     </button>
   )
 }

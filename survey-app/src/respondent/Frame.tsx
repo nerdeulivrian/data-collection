@@ -21,8 +21,8 @@ export type BarButton = {
 
 type Props = {
   layout: Breakpoint
-  /** the strip above the screen: the section's chip and the exit button; none at the start and the
-   * ends, where the strip has the language switch alone */
+  /** the strip above the screen: the section's chip, and what the exit button does; none at the
+   * start and the ends, where there is nothing to exit: the button stays in its place, gray */
   top: { chip: string; onExit: () => void } | null
   /** how far along, 0 to 1 */
   progress: number
@@ -70,7 +70,7 @@ export function Frame({
   const mobile = layout === "mobile"
   const reduced = usePrefersReducedMotion()
   const t = useStrings()
-  /** the chip and the exit button fade in and out with the questionnaire */
+  /** the chip fades in and out with the questionnaire */
   const fade = {
     initial: reduced ? false : { opacity: 0 },
     animate: { opacity: 1 },
@@ -94,19 +94,19 @@ export function Frame({
               </motion.div>
             )}
           </AnimatePresence>
-          {/* the language switch is on every screen, the start and the ends too, and never moves:
-              the exit button keeps its place beside it while it is away (Ian, 2026-11-19) */}
+          {/* the language switch and the exit button are on every screen, the start and the ends
+              too, and never move. Where there is nothing to exit the button is gray and does not
+              press: an empty place beside the switch looked like a missing button (Ian, 2026-11-19) */}
           <div className={clsx("ml-auto flex shrink-0 items-center", mobile ? "gap-3" : "gap-4")}>
             <LanguageSwitch big={!mobile} />
-            <div className={mobile ? "h-[23px] w-[23px]" : "h-[36px] w-[36px]"}>
-              <AnimatePresence initial={false}>
-                {top && (
-                  <motion.div key="exit" {...fade}>
-                    <TinyButton icon={CircleX} label={t.exit} tone="exit" big={!mobile} onClick={top.onExit} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <TinyButton
+              icon={CircleX}
+              label={t.exit}
+              tone="exit"
+              big={!mobile}
+              disabled={!top}
+              onClick={() => top?.onExit()}
+            />
           </div>
         </div>
       </div>
