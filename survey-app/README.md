@@ -21,11 +21,15 @@ form's respondent code is the one thing left out.
    automatically.
 4. **The letter** and **the general directions**, with the definition of a word retrieval
    difficulty.
-5. **Parts I to V.** Each part opens with its directions and its scale. Then comes one item per screen,
+5. **Parts I to V.** Each part opens with its directions. Then comes one item per screen,
    with BACK and NEXT and the progress bar. Part I asks the year level among its six items, in the
-   form's words. The Likert answers run from 5 to 1, left to right, each with its number and label.
-   Nothing is picked in advance. The Part III and IV stems are repeated above every item.
-6. **Only for those who pick *Third year (pilot test only)*:** the question about unclear items.
+   form's words. The Likert answers are a slider with five stops, from 5 to 1, left to right, each
+   with its number and label. Nothing is picked in advance: the slider has no knob until the
+   respondent taps a stop, and the knob can then be slid from stop to stop. The slider stays in one
+   place from item to item, and only the words above it change. The Part III and IV stems are
+   repeated above every item. A small count above the progress bar ("3 of 21") says where in the
+   part the respondent is.
+6. **Only for those who pick *Third year*:** the question about unclear items.
 7. **Review.** The page shows how many items are answered and lists the blank ones (II.3 is Part II,
    item 3). SUBMIT with blanks asks *Submit anyway?*. A blank item can be opened from the list: NEXT
    reads REVIEW there and comes straight back.
@@ -39,7 +43,8 @@ Everything is deleted from the phone once the answers are submitted.
 
 With no codes, anyone with the link can answer, and more than once: share the link only with the
 respondents. The year level each respondent picks decides the group: *First year* is Y1, *Second
-year* Y2, *Third year (pilot test only)* P.
+year* Y2, *Third year* P (saved in the form's words, *Third year (pilot test only)*). A grayed
+*Fourth year* card is shown but can't be picked.
 
 The answering time (`duration_min`) runs from the letter, right after the consent form, to
 SUBMIT, measured by the phone's own clock.

@@ -3,7 +3,7 @@ import { CircleX } from "lucide-react"
 import { AnimatePresence, motion, useIsPresent } from "motion/react"
 import type { ReactNode } from "react"
 import type { Breakpoint } from "@/app/useBreakpoint"
-import { Chip, TinyButton } from "@/components/Bits"
+import { Chip, Overline, TinyButton } from "@/components/Bits"
 import { PressButton, type ButtonTone } from "@/components/PressButton"
 import { ProgressBar } from "@/components/ProgressBar"
 import { step, usePrefersReducedMotion } from "@/design/motion"
@@ -23,6 +23,13 @@ type Props = {
   top: { chip: string; onExit: () => void } | null
   /** how far along, 0 to 1 */
   progress: number
+  /** "Page 3 of 12" or "3 of 10" above the progress bar, while the screens of one `group` (a section
+   * of more than one page, a part's items) slide under it */
+  pageCount: { group: string; text: string } | null
+  /** an answer control that stays where it is while the screens of one `group` slide (the Likert
+   * slider): it comes with the first of them and goes with the last. Those screens fill the
+   * screen's height, and leave the control its place */
+  dock: { group: string; node: ReactNode } | null
   /** null: the right button has the bottom row to itself */
   left: BarButton | null
   right: BarButton
@@ -39,12 +46,16 @@ type Props = {
  * 50px strip above (the section's chip, exit), the screen in the middle, and the progress bar over
  * an 80px row of buttons (BACK and NEXT, 130 × 44); from a tablet up the same in a 1000px column,
  * with the 140px band and its 150 × 50 buttons. A screen taller than the space it has scrolls on
- * its own, as the player's do; the screens are made to fit a small phone without that.
+ * its own, as the player's do; the screens are made to fit a small phone without that. Two things
+ * stay put while the screens of a group slide: the count above the progress bar ("Page 3 of 12",
+ * "3 of 21") and the dock (the Likert slider).
  */
 export function Frame({
   layout,
   top,
   progress,
+  pageCount,
+  dock,
   left,
   right,
   screenKey,
@@ -53,33 +64,85 @@ export function Frame({
   children,
 }: Props) {
   const mobile = layout === "mobile"
+  const reduced = usePrefersReducedMotion()
   return (
     <div className="flex h-app w-full flex-col overflow-hidden bg-bg" inert={inert}>
-      {top && (
-        <div
-          className={clsx(
-            "mx-auto flex w-full shrink-0 items-center justify-between",
-            mobile ? "h-strip px-5" : "h-[72px] max-w-[1000px] px-10",
+      {/* the strip keeps its height even when empty, so nothing below jumps when it appears */}
+      <div
+        className={clsx(
+          "mx-auto w-full shrink-0",
+          mobile ? "h-strip px-5" : "h-[72px] max-w-[1000px] px-10",
+        )}
+      >
+        <AnimatePresence initial={false}>
+          {top && (
+            <motion.div
+              key="top"
+              className="flex h-full items-center justify-between"
+              initial={reduced ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={reduced ? undefined : { opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              <Chip>{top.chip}</Chip>
+              <TinyButton icon={CircleX} label="Exit" tone="exit" big={!mobile} onClick={top.onExit} />
+            </motion.div>
           )}
-        >
-          <Chip>{top.chip}</Chip>
-          <TinyButton icon={CircleX} label="Exit" tone="exit" big={!mobile} onClick={top.onExit} />
-        </div>
-      )}
+        </AnimatePresence>
+      </div>
       <main className="relative min-h-0 flex-1">
         <AnimatePresence initial={false} custom={direction}>
-          <Stage key={screenKey} direction={direction} layout={layout}>
+          <Stage
+            key={screenKey}
+            direction={direction}
+            layout={layout}
+            roomBelow={pageCount !== null}
+            fill={dock !== null}
+          >
             {children}
           </Stage>
         </AnimatePresence>
+        <AnimatePresence initial={false} custom={direction}>
+          {dock && (
+            <Dock key={dock.group} direction={direction} layout={layout} roomBelow={pageCount !== null}>
+              {dock.node}
+            </Dock>
+          )}
+        </AnimatePresence>
       </main>
-      <div className="w-full shrink-0">
+      <div className="relative w-full shrink-0">
+        {/* the page count stays put while the pages of a section slide, and fades after the last */}
+        <AnimatePresence initial={false}>
+          {pageCount && (
+            <motion.div
+              key={pageCount.group}
+              className={clsx(
+                "pointer-events-none absolute inset-x-0 bottom-full flex justify-center",
+                mobile ? "pb-2" : "pb-3",
+              )}
+              initial={reduced ? false : { opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.08, duration: 0.32, ease: "easeOut" } }}
+              exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
+            >
+              <Overline>{pageCount.text}</Overline>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <ProgressBar fraction={progress} />
         {mobile ? <MobileBar left={left} right={right} /> : <WideBar left={left} right={right} />}
       </div>
     </div>
   )
 }
+
+/** the room around a screen; with a page count at the bottom, the screen keeps clear of it */
+const around = (layout: Breakpoint, roomBelow: boolean, flushTop = false) =>
+  clsx(
+    layout === "mobile" ? "px-4 py-5" : layout === "tablet" ? "px-[70px] py-6" : "px-10 py-6",
+    roomBelow && (layout === "mobile" ? "pb-10" : "pb-12"),
+    // a Likert item and its slider: no room kept at the top (Ian, 2026-11-19)
+    flushTop && "pt-0",
+  )
 
 /**
  * One screen. Leaving, it drifts out the way we are going while the next drifts in (design/motion
@@ -88,16 +151,22 @@ export function Frame({
 function Stage({
   direction,
   layout,
+  roomBelow,
+  fill,
   children,
 }: {
   direction: 1 | -1
   layout: Breakpoint
+  roomBelow: boolean
+  /** the screen takes the whole height and lays itself out in it (a Likert item, over the dock) */
+  fill: boolean
   children: ReactNode
 }) {
   const present = useIsPresent()
   const reduced = usePrefersReducedMotion()
   return (
     <motion.div
+      data-stage
       className="absolute inset-0 overflow-y-auto"
       custom={direction}
       variants={step}
@@ -109,12 +178,50 @@ function Stage({
     >
       <div
         className={clsx(
-          "flex min-h-full items-center justify-center",
-          layout === "mobile" ? "px-4 py-5" : layout === "tablet" ? "px-[70px] py-6" : "px-10 py-6",
+          "flex items-center justify-center",
+          fill ? "h-full" : "min-h-full",
+          around(layout, roomBelow, fill),
         )}
       >
         {children}
       </div>
+    </motion.div>
+  )
+}
+
+/**
+ * The dock: over the screens, in the same room as a screen that fills the height, so what it holds
+ * lines up with the place that screen leaves for it. It comes and goes as a screen does; between,
+ * the screens slide under it. Only what it holds can be pressed.
+ */
+function Dock({
+  direction,
+  layout,
+  roomBelow,
+  children,
+}: {
+  direction: 1 | -1
+  layout: Breakpoint
+  roomBelow: boolean
+  children: ReactNode
+}) {
+  const present = useIsPresent()
+  const reduced = usePrefersReducedMotion()
+  return (
+    <motion.div
+      className={clsx(
+        "pointer-events-none absolute inset-0 flex items-center justify-center",
+        around(layout, roomBelow, true),
+      )}
+      custom={direction}
+      variants={step}
+      initial={reduced ? false : "enter"}
+      animate="shown"
+      exit={reduced ? undefined : "gone"}
+      inert={!present}
+      aria-hidden={!present || undefined}
+    >
+      {children}
     </motion.div>
   )
 }
@@ -167,3 +274,4 @@ function WideBar({ left, right }: { left: BarButton | null; right: BarButton }) 
     </div>
   )
 }
+

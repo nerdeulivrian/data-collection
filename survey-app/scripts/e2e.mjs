@@ -2,8 +2,9 @@
  * The whole questionnaire, end to end, in a real browser against the real Code.gs (on the pretend
  * Sheet of `pnpm dev`): it starts the dev server, answers as a pilot respondent on a small phone
  * (360 × 640) and as a first year on a laptop, takes a break and comes back, declines, checks that
- * no question screen needs scrolling, that the rows land in the right tabs, and that the
- * researchers' page counts them and exports them. Screenshots go to e2e-out/.
+ * no question screen needs scrolling, that the Likert slider stays in its place and starts every
+ * item with nothing picked, that the rows land in the right tabs, and that the researchers' page
+ * counts them and exports them. Screenshots go to e2e-out/.
  *
  *   node scripts/e2e.mjs            (or pnpm e2e)
  */
@@ -31,10 +32,19 @@ const settle = (page) => page.waitForTimeout(520)
 
 async function overflow(page) {
   return page.evaluate(() => {
-    const stages = [...document.querySelectorAll("main > div")].filter((d) => d.getAttribute("aria-hidden") !== "true")
+    const stages = [...document.querySelectorAll("main > [data-stage]")].filter((d) => d.getAttribute("aria-hidden") !== "true")
     const s = stages.at(-1)
-    return s ? s.scrollHeight - s.clientHeight : 0
+    if (!s) return 0
+    // a Likert item's words scroll in a box of their own, above the slider
+    const words = s.querySelector("[data-scroll]")
+    return Math.max(s.scrollHeight - s.clientHeight, words ? words.scrollHeight - words.clientHeight : 0)
   })
+}
+
+/** the middle of a stop of the Likert slider */
+async function stopAt(page, value) {
+  const box = await page.locator(`[role="radiogroup"] button[aria-label^="${value} "] span.rounded-full`).last().boundingBox()
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
 async function clickNext(page) {
@@ -48,6 +58,9 @@ async function clickNext(page) {
  */
 async function walk(page, { pick, shots }) {
   const scrolled = []
+  /** where the Likert slider's top is, on every item: one place only */
+  const sliderAt = new Set()
+  let likertItems = 0
   await page.goto(base + "/")
   await shots?.("01-start")
   await clickNext(page)
@@ -95,14 +108,31 @@ async function walk(page, { pick, shots }) {
     }
     if (heading.includes("reached the end")) {
       await snap("review")
+      if (sliderAt.size > 1) fail(`the Likert slider moved from item to item: its top was at ${[...sliderAt].join(", ")}px`)
       return { scrolled }
     }
     const likert = page.locator('[role="radiogroup"] button[aria-label^="5 "]')
     if (await likert.count()) {
       if (over > 0) scrolled.push([`${chip} "${heading.slice(0, 40)}"`, over])
+      // the slider stays from the item before, but nothing is picked on a new item
+      const before = await page.locator('[role="radio"][aria-checked="true"]').count()
+      if (before || (await page.locator('[role="radiogroup"] .press').count())) fail(`${chip} "${heading.slice(0, 40)}" shows an answer before any is picked`)
+      sliderAt.add(Math.round((await page.locator('[role="radiogroup"]').last().boundingBox()).y))
       const id = await page.evaluate(() => document.querySelector("main h1")?.textContent)
       const value = pick(`${chip}|${id}`)
-      if (value) await page.locator(`[role="radiogroup"] button[aria-label^="${value} "]`).last().click()
+      if (value) {
+        if (++likertItems % 6 === 0) {
+          // now and then by sliding the knob: down on another stop, along, and let go near the answer
+          const from = await stopAt(page, value === "3" ? 5 : 3)
+          const to = await stopAt(page, value)
+          await page.mouse.move(from.x, from.y)
+          await page.mouse.down()
+          await page.mouse.move(to.x + 6, to.y + 14, { steps: 6 })
+          await page.mouse.up()
+        } else await page.locator(`[role="radiogroup"] button[aria-label^="${value} "]`).last().click()
+        const got = await page.locator('[role="radio"][aria-checked="true"]').getAttribute("aria-label")
+        if (!got?.startsWith(`${value} `)) fail(`${chip} "${heading.slice(0, 40)}": picked ${value}, the slider says ${got}`)
+      }
       await snap(`likert-${chip.replace(/\s+/g, "")}`)
       await clickNext(page)
       continue
@@ -165,7 +195,7 @@ try {
       P1_age: "21",
       Age: "21",
       Sex: "Female",
-      "Year level": "Third year (pilot test only)",
+      "Year level": "Third year", // the card's words; the answer saved is "Third year (pilot test only)"
       "First language, the language you learned first at home": "Other",
       "Language you use most often at home": "Bisaya/Cebuano",
       "How often do you speak English outside your classes?": "Sometimes",

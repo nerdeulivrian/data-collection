@@ -1,19 +1,19 @@
 import clsx from "clsx"
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
-import { CheckCards, ChoiceCards, LikertScale } from "@/components/Answers"
+import { CheckCards, ChoiceCards, LikertSlider, likertSliderHeight } from "@/components/Answers"
 import { Overline } from "@/components/Bits"
 import { optionStyle } from "@/components/optionStyles"
 import { TextField } from "@/components/TextField"
 import {
   likertAt,
   likertParts,
+  PILOT_YEAR,
   paragraphs,
   partName,
   profile,
   q,
   type Answers,
-  type LikertPart,
   type Screen,
 } from "@/survey"
 
@@ -48,20 +48,16 @@ function Question({ children, compact }: { children: ReactNode; compact: boolean
 const reading = (compact: boolean) =>
   compact ? "text-[15px] leading-[22px]" : "text-[18px] leading-[28px]"
 
-/** "Directions:" in bold, the rest as it is */
+/**
+ * A part's directions, as the form has them but for two things left out (Ian, 2026-11-19): the word
+ * "Directions:" before them, and the last sentence of Parts II to IV, "Choose one answer for each
+ * statement." (the general directions say it once, and the slider takes one answer only).
+ */
 function Directions({ text, compact }: { text: string; compact: boolean }) {
-  const m = text.match(/^(Directions:)\s*([\s\S]*)$/)
-  return (
-    <p className={clsx("font-medium text-pretty text-ink", reading(compact))}>
-      {m ? (
-        <>
-          <span className="font-[700] text-ink-strong">{m[1]}</span> {m[2]}
-        </>
-      ) : (
-        text
-      )}
-    </p>
-  )
+  const shown = text
+    .replace(/^Directions:\s*/, "")
+    .replace(/\s*Choose one answer for each statement\.$/, "")
+  return <p className={clsx("font-medium text-pretty text-ink", reading(compact))}>{shown}</p>
 }
 
 /* ---------- the start ---------- */
@@ -154,15 +150,10 @@ export function ReadScreen({
   screen: Extract<Screen, { kind: "read" }>
   compact: boolean
 }) {
-  const { section, title, page, pages } = screen
+  const { section, title } = screen
   const letter = section === "letter"
   return (
     <Column className={compact ? "gap-3" : "gap-4"}>
-      {pages > 1 && (
-        <Overline>
-          Page {page} of {pages}
-        </Overline>
-      )}
       {title && (
         <h1
           className={clsx(
@@ -272,58 +263,20 @@ export function SignScreen({
 
 /* ---------- the parts ---------- */
 
-/** the five answers, small and still, so the directions show what each number means */
-function ScaleKey({ scale, compact }: { scale: LikertPart["scale"]; compact: boolean }) {
-  return (
-    <ul className={clsx("grid w-full grid-cols-5", compact ? "gap-[5px]" : "gap-3")} aria-label="The answers">
-      {scale.map((s) => (
-        <li
-          key={s.value}
-          className={clsx(
-            "flex flex-col items-center rounded-[8px] border-2 border-line text-center",
-            compact ? "gap-1 px-[2px] py-2" : "gap-2 px-2 py-3",
-          )}
-        >
-          <span className={clsx("leading-none font-[800] text-ink", compact ? "text-[18px]" : "text-[24px]")}>
-            {s.value}
-          </span>
-          <span
-            className={clsx(
-              "font-[700] text-ink-soft",
-              compact ? "text-[10.5px] leading-[12px]" : "text-[13px] leading-[16px]",
-            )}
-          >
-            {s.label}
-          </span>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 export function PartIntroScreen({ part, compact }: { part: number; compact: boolean }) {
   const p = part === 0 ? profile : likertParts[part - 1]
-  const { roman, name } = partName(p.title)
-  const scale = part === 0 ? null : (p as LikertPart).scale
-  const count = part === 0 ? null : (p as LikertPart).items.length
+  const { name } = partName(p.title)
   return (
     <Column className={compact ? "gap-4" : "gap-6"}>
-      <div className="flex flex-col gap-1">
-        <Overline>
-          Part {roman}
-          {count !== null && ` · ${count} items`}
-        </Overline>
-        <h1
-          className={clsx(
-            "leading-[1.15] font-extrabold text-balance text-ink-strong",
-            compact ? "text-[26px]" : "text-[36px]",
-          )}
-        >
-          {name}
-        </h1>
-      </div>
+      <h1
+        className={clsx(
+          "leading-[1.15] font-extrabold text-balance text-ink-strong",
+          compact ? "text-[26px]" : "text-[36px]",
+        )}
+      >
+        {name}
+      </h1>
       <Directions text={p.directions} compact={compact} />
-      {scale && <ScaleKey scale={scale} compact={compact} />}
     </Column>
   )
 }
@@ -339,16 +292,11 @@ export function ProfileScreen({
   onAnswer: (id: string, value: string) => void
   compact: boolean
 }) {
-  const { item, ordinal, of } = screen
+  const { item } = screen
   const value = answers[item.id]
   return (
     <Column className={compact ? "gap-5" : "gap-7"}>
-      <div className="flex flex-col items-center gap-2">
-        <Overline>
-          {ordinal} of {of}
-        </Overline>
-        <Question compact={compact}>{item.label}</Question>
-      </div>
+      <Question compact={compact}>{item.label}</Question>
       {item.type === "number" ? (
         <div className="mx-auto w-[150px]">
           <TextField
@@ -370,6 +318,13 @@ export function ProfileScreen({
           value={value === undefined ? null : String(value)}
           onChoose={(option) => onAnswer(item.id, option)}
           compact={compact}
+          // fourth years are not in the study: the card is there to be seen, not picked (Ian, 2026-11-19)
+          shownOnly={item.id === "P1_year" ? ["Fourth year"] : undefined}
+          // the pilot's year reads "Third year"; the answer saved keeps the form's words, which make
+          // the group P (Ian, 2026-11-19)
+          shownAs={{ [PILOT_YEAR]: "Third year" }}
+          // Sex: one card under the other at every width (Ian, 2026-11-19)
+          stacked={item.id === "P1_sex"}
           other={
             item.other
               ? {
@@ -384,7 +339,55 @@ export function ProfileScreen({
   )
 }
 
+/*
+ * A Likert item is two layers of one box. The words (LikertScreen) slide from item to item; the
+ * slider (LikertDock, in the Frame's dock) stays where it is. The box is a Column of a set height
+ * in the middle of the screen: the slider at its bottom, the words standing on it and growing
+ * upwards, so from one item to the next only the words change. Words too long for the room (a very
+ * small phone) scroll on their own, above the slider. 320px holds the longest item on a 320px
+ * phone (181px of words) and on a tablet (152px), with the slider under it.
+ */
+const likertBox = "flex h-full max-h-[320px] w-full max-w-[560px] flex-col tablet:max-w-[680px]"
+
 export function LikertScreen({
+  screen,
+  compact,
+}: {
+  screen: Extract<Screen, { kind: "likert" }>
+  compact: boolean
+}) {
+  const { part, item } = likertAt(screen)
+  return (
+    <div className={likertBox}>
+      <div data-scroll className={clsx("flex min-h-0 flex-1 flex-col overflow-y-auto", compact ? "pb-5" : "pb-8")}>
+        <div className={clsx("mt-auto flex flex-col items-center text-center", compact ? "gap-2" : "gap-3")}>
+          {/* the part's stem, repeated on every item (Part III and IV's sentences run on into the item) */}
+          <p
+            className={clsx(
+              "font-semibold text-balance text-ink-secondary",
+              compact ? "text-[15px] leading-[21px]" : "text-[19px] leading-[27px]",
+            )}
+          >
+            {part.stem}
+          </p>
+          <h1
+            className={clsx(
+              "leading-[1.25] font-[700] text-balance text-ink-strong",
+              compact ? "text-[21px]" : "text-[30px]",
+            )}
+          >
+            {item.text}
+          </h1>
+        </div>
+      </div>
+      {/* the slider's place: the slider itself is in the Frame's dock */}
+      <div aria-hidden className={clsx("shrink-0", likertSliderHeight(compact))} />
+    </div>
+  )
+}
+
+/** The slider of a Likert item, at the bottom of the item's box (see LikertScreen). */
+export function LikertDock({
   screen,
   value,
   onChoose,
@@ -397,31 +400,18 @@ export function LikertScreen({
 }) {
   const { part, item } = likertAt(screen)
   return (
-    <Column className={compact ? "gap-6" : "gap-9"}>
-      <div className={clsx("flex flex-col items-center text-center", compact ? "gap-2" : "gap-3")}>
-        <Overline>
-          {item.n} of {part.items.length}
-        </Overline>
-        {/* the part's stem, repeated on every item (Part III and IV's sentences run on into the item) */}
-        <p
-          className={clsx(
-            "font-semibold text-balance text-ink-secondary",
-            compact ? "text-[15px] leading-[21px]" : "text-[19px] leading-[27px]",
-          )}
-        >
-          {part.stem}
-        </p>
-        <h1
-          className={clsx(
-            "leading-[1.25] font-[700] text-balance text-ink-strong",
-            compact ? "text-[21px]" : "text-[30px]",
-          )}
-        >
-          {item.text}
-        </h1>
+    <div className={clsx(likertBox, "justify-end")}>
+      <div className="pointer-events-auto">
+        <LikertSlider
+          label={item.text}
+          scale={part.scale}
+          value={value}
+          onChoose={onChoose}
+          compact={compact}
+          itemKey={item.id}
+        />
       </div>
-      <LikertScale label={item.text} scale={part.scale} value={value} onChoose={onChoose} compact={compact} />
-    </Column>
+    </div>
   )
 }
 

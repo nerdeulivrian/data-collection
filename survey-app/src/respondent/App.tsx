@@ -214,6 +214,9 @@ export function App() {
 
   let key: string
   let top: { chip: string; onExit: () => void } | null = null
+  let pageCount: { group: string; text: string } | null = null
+  /** the Likert slider: it stays where it is while a part's items slide */
+  let dock: { group: string; node: ReactNode } | null = null
   /** the bar: empty at the start */
   let progress = 0
   let left: BarButton | null = null
@@ -229,6 +232,15 @@ export function App() {
   if (view === "flow" && session && screen) {
     key = `flow-${at}`
     top = { chip: chipFor(screen), onExit: () => setDialog("exit") }
+    // the count above the progress bar: a section's pages, Part I's items, each Likert part's items
+    if (screen.kind === "read" && screen.pages > 1)
+      pageCount = { group: screen.section, text: `Page ${screen.page} of ${screen.pages}` }
+    else if (screen.kind === "profile")
+      pageCount = { group: "profile", text: `${screen.ordinal} of ${screen.of}` }
+    else if (screen.kind === "likert") {
+      const { part, item } = likertAt(screen)
+      pageCount = { group: `part-${screen.part}`, text: `${item.n} of ${part.items.length}` }
+    }
     progress = flowProgress
     const nextButton: BarButton =
       fromReview && (screen.kind === "likert" || screen.kind === "profile")
@@ -320,14 +332,18 @@ export function App() {
         const value = session.answers[id]
         left = backButton()
         right = nextButton
-        body = (
-          <S.LikertScreen
-            screen={screen}
-            value={typeof value === "number" ? value : null}
-            onChoose={(v) => answer(id, v)}
-            compact={compact}
-          />
-        )
+        body = <S.LikertScreen screen={screen} compact={compact} />
+        dock = {
+          group: `part-${screen.part}`,
+          node: (
+            <S.LikertDock
+              screen={screen}
+              value={typeof value === "number" ? value : null}
+              onChoose={(v) => answer(id, v)}
+              compact={compact}
+            />
+          ),
+        }
         break
       }
       case "pilot":
@@ -390,13 +406,29 @@ export function App() {
   /* ---------- keys, on a computer: Enter is the orange button, 1–5 pick, Esc to leave ---------- */
 
   const keys = useRef<(e: KeyboardEvent) => void>(() => {})
+  /** a number key picked an answer while another had the focus: the focus moves to the picked one,
+   *  so that Enter is then NEXT and doesn't press the other answer instead */
+  const refocus = useRef(false)
+  useEffect(() => {
+    if (!refocus.current) return
+    refocus.current = false
+    document.activeElement
+      ?.closest("[data-answers]")
+      ?.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]')
+      ?.focus({ preventScroll: true })
+  })
   useLayoutEffect(() => {
     keys.current = (e) => {
       if (dialog || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return
       const target = e.target instanceof Element ? e.target : null
       if (e.key === "Enter") {
-        // a focused button presses itself, and a text box takes its own Enter
-        if (target?.closest("button, a, textarea")) return
+        // a text box takes its own Enter, and a focused button presses itself: an answer in focus
+        // (a card, a stop of the slider) is picked by it. Once it is the picked one, Enter is the
+        // orange button, as everywhere else
+        if (target?.closest("textarea")) return
+        const onPicked =
+          target?.closest('[data-answers] [role="radio"]')?.getAttribute("aria-checked") === "true"
+        if (target?.closest("button, a") && !onPicked) return
         if (!right.disabled) {
           e.preventDefault()
           right.onClick()
@@ -411,6 +443,8 @@ export function App() {
       }
       if (!session || !screen || !/^[1-9]$/.test(e.key)) return
       const n = Number(e.key)
+      // with an answer in focus, the focus follows the one a number picks (below)
+      refocus.current = true
       if (screen.kind === "likert" && n <= 5) answer(likertAt(screen).item.id, n)
       if (screen.kind === "age" && n <= q.age_check.options.length) update({ age: q.age_check.options[n - 1] })
       if (screen.kind === "profile" && screen.item.type === "choice") {
@@ -431,6 +465,8 @@ export function App() {
         layout={layout}
         top={top}
         progress={progress}
+        pageCount={pageCount}
+        dock={dock}
         left={left}
         right={right}
         screenKey={key}
