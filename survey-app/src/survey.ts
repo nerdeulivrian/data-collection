@@ -49,7 +49,14 @@ export type Questionnaire = {
 }
 
 export const q = raw as unknown as Questionnaire
-export const profile: ProfilePart = q.parts[0]
+/**
+ * Part I as the respondents get it: the form's items without the age (Ian, 2026-11-19: not asked),
+ * numbered again from 1. The Sheet keeps its `P1_age` column, which stays empty.
+ */
+export const profile: ProfilePart = {
+  ...q.parts[0],
+  items: q.parts[0].items.filter((i) => i.id !== "P1_age").map((item, i) => ({ ...item, n: i + 1 })),
+}
 export const likertParts = q.parts.slice(1) as LikertPart[]
 
 /** Part I's year level: first year, second year, and the pilot's third year (the form's words) */

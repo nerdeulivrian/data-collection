@@ -1,4 +1,4 @@
-import { CircleCheck, Hand, Undo2 } from "lucide-react"
+import { Check, Hand, Undo2 } from "lucide-react"
 import { AnimatePresence } from "motion/react"
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useTapSink } from "@/app/tapPress"
@@ -31,17 +31,13 @@ type Dialog = "exit" | "decline" | "blanks" | "restart" | null
 
 function chipFor(screen: Screen): string {
   switch (screen.kind) {
+    // the age check and the consent form have no name in the strip (Ian, 2026-11-19)
     case "age":
-      return "Welcome"
-    case "read":
-      return screen.section === "consent"
-        ? "Informed consent"
-        : screen.section === "letter"
-          ? "Letter"
-          : "Directions"
     case "dataUse":
     case "sign":
-      return "Informed consent"
+      return ""
+    case "read":
+      return screen.section === "consent" ? "" : screen.section === "letter" ? "Letter" : "Directions"
     case "partIntro":
       return `Part ${partName(q.parts[screen.part].title).roman}`
     case "profile":
@@ -184,6 +180,8 @@ export function App() {
       if (item.other && answers[item.id] !== OTHER) answers[item.other] = ""
     }
     if (!isPilot(answers)) delete answers.pilot_feedback
+    // the age is no longer asked: one typed before that, still on this phone, isn't sent
+    delete answers.P1_age
     // sending again after a lost reply is safe: the server keeps the first copy it got
     const r = await api.submit({
       id: session.id,
@@ -235,6 +233,8 @@ export function App() {
     // the count above the progress bar: a section's pages, Part I's items, each Likert part's items
     if (screen.kind === "read" && screen.pages > 1)
       pageCount = { group: screen.section, text: `Page ${screen.page} of ${screen.pages}` }
+    // where the consent form is signed, the date it is signed on
+    else if (screen.kind === "sign") pageCount = { group: "sign", text: S.today() }
     else if (screen.kind === "profile")
       pageCount = { group: "profile", text: `${screen.ordinal} of ${screen.of}` }
     else if (screen.kind === "likert") {
@@ -377,7 +377,7 @@ export function App() {
     right = { label: view === "done" ? "Done" : "OK", onClick: () => finish("start") }
     body =
       view === "done" ? (
-        <S.EndScreen icon={CircleCheck} tone="brand" title={q.closing_message} body="Your answers have been sent." compact={compact} />
+        <S.EndScreen icon={Check} tone="brand" title={q.closing_message} body="Your answers have been sent." compact={compact} />
       ) : view === "minor" ? (
         <S.EndScreen icon={Hand} tone="quiet" title={q.age_check.stop_title} body={q.age_check.stop_message} compact={compact} />
       ) : (

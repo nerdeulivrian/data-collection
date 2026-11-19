@@ -45,6 +45,9 @@ function Question({ children, compact }: { children: ReactNode; compact: boolean
   )
 }
 
+/** the researcher's name as he wants it shown, without the form's middle initial (Ian, 2026-11-19) */
+const noInitial = (text: string) => text.replaceAll("Ian M. Quibete", "Ian Quibete")
+
 const reading = (compact: boolean) =>
   compact ? "text-[15px] leading-[22px]" : "text-[18px] leading-[28px]"
 
@@ -94,7 +97,8 @@ export function StartScreen({
               compact ? "text-[13px] leading-[19px]" : "text-[15px] leading-[22px]",
             )}
           >
-            {p}
+            {/* the form's line without the program (Ian, 2026-11-19) */}
+            {noInitial(p).replace(" (BSEd English 3)", "")}
           </p>
         ))}
       </div>
@@ -137,6 +141,8 @@ export function AgeScreen({
         value={value}
         onChoose={onChoose}
         compact={compact}
+        // Yes over No at every width (Ian, 2026-11-19)
+        stacked
       />
     </Column>
   )
@@ -181,7 +187,7 @@ export function ReadScreen({
                   : "font-medium text-ink",
               )}
             >
-              {p}
+              {noInitial(p)}
             </p>
           )
         })}
@@ -218,7 +224,7 @@ export function DataUseScreen({
   )
 }
 
-const today = () =>
+export const today = () =>
   new Date().toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })
 
 export function SignScreen({
@@ -238,13 +244,14 @@ export function SignScreen({
 }) {
   const f = q.consent.fields
   return (
-    <Column className={compact ? "gap-4" : "gap-5"}>
+    // 14px between them on a phone: with the line, 16px would make a 320 × 568 phone scroll
+    <Column className={compact ? "gap-[14px]" : "gap-5"}>
       <TextField id="name" label={f.name} value={name} onChange={(v) => onChange("name", v)} autoComplete="name" maxLength={120} />
       <TextField id="signature" label={f.signature} value={signature} onChange={(v) => onChange("signature", v)} maxLength={120} />
       <TextField id="address" label={f.address} value={address} onChange={(v) => onChange("address", v)} autoComplete="street-address" maxLength={200} />
-      <p className="text-[14px] font-semibold text-ink-secondary">
-        Date: <span className="text-ink">{today()}</span>
-      </p>
+      {/* a line between what is typed and the question; the date is above the progress bar, where
+          the counts are (App.tsx) (Ian, 2026-11-19) */}
+      <hr className="w-full border-t-2 border-line" />
       <div className="flex flex-col items-center text-center">
         <p className={clsx("font-[700] text-ink-strong", compact ? "text-[17px]" : "text-[20px]")}>
           {q.consent.agree.question}

@@ -22,7 +22,7 @@ form's respondent code is the one thing left out.
 4. **The letter** and **the general directions**, with the definition of a word retrieval
    difficulty.
 5. **Parts I to V.** Each part opens with its directions. Then comes one item per screen,
-   with BACK and NEXT and the progress bar. Part I asks the year level among its six items, in the
+   with BACK and NEXT and the progress bar. Part I asks the year level among its five items (the form's six without the age), in the
    form's words. The Likert answers are a slider with five stops, from 5 to 1, left to right, each
    with its number and label. Nothing is picked in advance: the slider has no knob until the
    respondent taps a stop, and the knob can then be slid from stop to stop. The slider stays in one
@@ -56,7 +56,7 @@ It lives in one Google Sheet, in two tabs:
 | Tab | What | |
 |---|---|---|
 | `consents` | response_id, name, signature, address, data_use_1–3 (Yes/No, in the form's order), agreed_at | names: keep apart |
-| `responses` | one row per submission: `response_id`, `group`, `P1_age` … `P1_engfreq`, `P2_01` … `P5_10` (1–5 or blank), `pilot_feedback`, `started_at`, `submitted_at`, `duration_min` | 63 columns |
+| `responses` | one row per submission: `response_id`, `group`, `P1_age` … `P1_engfreq`, `P2_01` … `P5_10` (1–5 or blank), `pilot_feedback`, `started_at`, `submitted_at`, `duration_min` | 63 columns; `P1_age` stays empty, since the age is no longer asked |
 
 `response_id` is made on the phone for each questionnaire (like `R-K7Q2XM4P`). It ties a consent
 row to its answers, so a respondent who withdraws can be removed from both. The same questionnaire

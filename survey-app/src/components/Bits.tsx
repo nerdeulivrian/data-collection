@@ -4,10 +4,10 @@ import { motion } from "motion/react"
 import { useEffect, useRef, type ReactNode } from "react"
 import { popIn, presence, usePrefersReducedMotion } from "@/design/motion"
 
-/** Tuwon's mode badge look: white capitals on an orange pill. */
+/** The section's name in the strip: gray capitals, no pill behind them (Ian, 2026-11-19). */
 export function Chip({ children }: { children: ReactNode }) {
   return (
-    <span className="flex shrink-0 items-center rounded-pill bg-brand px-3 py-[5px] text-[11px] font-extrabold tracking-[0.6px] text-white uppercase">
+    <span data-chip className="flex shrink-0 items-center text-[12px] font-extrabold tracking-[0.8px] text-ink-secondary uppercase">
       {children}
     </span>
   )

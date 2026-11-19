@@ -18,21 +18,20 @@ import {
 } from "./survey"
 
 describe("the questionnaire", () => {
-  it("has all 55 items: 6 profile, then 8, 21, 10 and 10 Likert", () => {
+  it("has all 54 items: 5 profile (the form's, without the age), then 8, 21, 10 and 10 Likert", () => {
     expect(profile.items.map((i) => i.id)).toEqual([
-      "P1_age",
       "P1_sex",
       "P1_year",
       "P1_l1",
       "P1_home",
       "P1_engfreq",
     ])
-    expect(profile.items.map((i) => i.n)).toEqual([1, 2, 3, 4, 5, 6])
+    expect(profile.items.map((i) => i.n)).toEqual([1, 2, 3, 4, 5])
     expect(likertParts.map((p) => p.items.length)).toEqual([8, 21, 10, 10])
   })
 
   it("asks the year level in the form's words, the pilot's last", () => {
-    expect(profile.items[2]).toMatchObject({
+    expect(profile.items[1]).toMatchObject({
       type: "choice",
       options: ["First year", "Second year", "Third year (pilot test only)"],
     })
@@ -70,12 +69,12 @@ describe("the flow", () => {
   })
 
   it("asks one item per screen, in order", () => {
-    expect(askedCount(flow)).toBe(6 + 49)
+    expect(askedCount(flow)).toBe(5 + 49)
     const ids = flow.flatMap((s) =>
       s.kind === "profile" ? [s.item.id] : s.kind === "likert" ? [likertAt(s).item.id] : [],
     )
-    expect(ids.slice(0, 6)).toEqual(profile.items.map((i) => i.id))
-    expect(ids[6]).toBe("P2_01")
+    expect(ids.slice(0, 5)).toEqual(profile.items.map((i) => i.id))
+    expect(ids[5]).toBe("P2_01")
     expect(ids.at(-1)).toBe("P5_10")
     expect(new Set(ids).size).toBe(ids.length)
   })
@@ -120,18 +119,18 @@ describe("blanks", () => {
 
   it("lists every unanswered item, by part and number", () => {
     const all = blanks(flow, {})
-    expect(all).toHaveLength(55)
+    expect(all).toHaveLength(54)
     expect(all[0].label).toBe("I.1")
     expect(all.find((b) => b.label === "III.21")).toBeTruthy()
   })
 
   it("counts an answer of any kind, and never the optional pilot question", () => {
-    const answers = { P1_age: "19", P2_01: 3, P1_sex: "  " }
+    const answers = { P1_year: "First year", P2_01: 3, P1_sex: "  " }
     const left = blanks(flow, answers).map((b) => b.label)
-    expect(left).not.toContain("I.1")
+    expect(left).not.toContain("I.2")
     expect(left).not.toContain("II.1")
-    expect(left).toContain("I.2")
-    expect(left).toHaveLength(53)
+    expect(left).toContain("I.1")
+    expect(left).toHaveLength(52)
   })
 
   it("labels point at their screens", () => {

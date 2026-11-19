@@ -68,7 +68,7 @@ async function walk(page, { pick, shots }) {
   let shotKinds = new Set()
   for (;;) {
     if (++guard > 120) throw new Error("the questionnaire never ended")
-    const chip = (await page.locator("div > span.rounded-pill").first().textContent().catch(() => "")) ?? ""
+    const chip = (await page.locator("[data-chip]").first().textContent().catch(() => "")) ?? ""
     const heading = (await page.locator("main h1").last().textContent().catch(() => "")) ?? ""
     const over = await overflow(page)
     const snap = async (kind) => {
@@ -137,14 +137,7 @@ async function walk(page, { pick, shots }) {
       await clickNext(page)
       continue
     }
-    if (await page.locator("#P1_age").count()) {
-      if (over > 0) scrolled.push(["age", over])
-      const v = pick("P1_age")
-      if (v) await page.locator("#P1_age").fill(v)
-      await snap("profile-age")
-      await clickNext(page)
-      continue
-    }
+    if (await page.locator("#P1_age").count()) fail("the age is asked in Part I")
     const radios = page.locator('main [role="radiogroup"] [role="radio"]')
     if (await radios.count()) {
       if (over > 0) scrolled.push([`profile "${heading}"`, over])
@@ -192,8 +185,6 @@ try {
     let n = 0
     const shots = (name) => page.screenshot({ path: `${out}phone-${name}.png` })
     const answersByScreen = {
-      P1_age: "21",
-      Age: "21",
       Sex: "Female",
       "Year level": "Third year", // the card's words; the answer saved is "Third year (pilot test only)"
       "First language, the language you learned first at home": "Other",
@@ -211,7 +202,7 @@ try {
     }
     void notReading
     const reviewText = await page.locator("main").last().textContent()
-    if (!reviewText.includes("You answered 55 of 55 items")) fail(`review says: ${reviewText}`)
+    if (!reviewText.includes("You answered 54 of 54 items")) fail(`review says: ${reviewText}`)
     await page.locator('[data-bar="right"]').click()
     await page.getByText("Thank you for answering the questionnaire.").waitFor()
     await settle(page)
@@ -223,7 +214,7 @@ try {
     if (consent?.response_id !== row?.response_id) fail("the consent and the answers don't share a response_id")
     const expect = {
       group: "P",
-      P1_age: 21,
+      P1_age: "",
       P1_sex: "Female",
       P1_year: "Third year (pilot test only)",
       P1_l1: "Other",
@@ -269,7 +260,6 @@ try {
     const skip = new Set(["Sex"])
     const pick = (key) => {
       if (skip.has(key)) return null
-      if (key === "P1_age") return "19"
       if (key === "Year level") return "First year"
       if (key.startsWith("First language") || key.startsWith("Language you use")) return "Filipino/Tagalog"
       if (key.startsWith("How often do you speak")) return "Rarely"
@@ -279,7 +269,7 @@ try {
     const shots = (name) => page.screenshot({ path: `${out}laptop-${name}.png` })
     await walk(page, { pick, shots })
     const reviewText = await page.locator("main").last().textContent()
-    if (!reviewText.includes("You answered 53 of 55 items")) fail(`review says: ${reviewText}`)
+    if (!reviewText.includes("You answered 52 of 54 items")) fail(`review says: ${reviewText}`)
 
     // a reload keeps everything
     await page.reload()
@@ -292,7 +282,7 @@ try {
     // the card fades in once the screen has grayed
     await page.waitForTimeout(500)
     await page.screenshot({ path: `${out}laptop-97-blanks.png` })
-    await page.getByRole("dialog").getByRole("button", { name: "Go to item I.2" }).click()
+    await page.getByRole("dialog").getByRole("button", { name: "Go to item I.1" }).click()
     await settle(page)
     await page.getByRole("radio", { name: "Male", exact: true }).click()
     if ((await page.locator('[data-bar="right"]').textContent()) !== "Review") fail("NEXT doesn't read REVIEW after a jump")
